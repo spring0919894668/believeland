@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>相信土地｜農地開發潛力平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 穩重、像地政事務所遇上投資研究報告；說清楚，不喊口號
+   IDEA: 一張「土地開發進度圖」——像地籍圖與都市計畫圖疊在一起的看板
+   PICTURE: 自繪台灣地圖，開發案依階段標色，點選即看進度軌道
+   COLOUR and TYPE: 稻田深綠為底色、稻穗金為輔、柿橘為警示重點；Noto Sans TC 900/400
+   LAYOUT: 頂部導覽→地圖為主角→卡片與表格；手機單欄堆疊 */
+:root{color-scheme:light dark;
+--bg:light-dark(#fafbf7,#0c1711);--ink:light-dark(#14221a,#e7efe9);--mute:light-dark(#566459,#9fb2a5);
+--field:light-dark(#1d4a33,#1f5a3d);--fieldInk:#f2f7f3;--rice:light-dark(#e8d36a,#c9b44e);--acc:light-dark(#d4502a,#f07a50);
+--card:light-dark(#ffffff,#13241a);--line:light-dark(#dfe6df,#26392d);--soft:light-dark(#eef3ec,#162a1e);
+--pre:light-dark(#2f6db0,#6aa6e6);--mid:light-dark(#d4502a,#f07a50);--post:light-dark(#2f8a57,#5cc48a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+h1,h2,h3{line-height:1.15;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(32px,5vw,50px);font-weight:900}h2{font-size:clamp(24px,3vw,32px);font-weight:900}h3{font-size:19px;font-weight:700}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}.wrap{max-width:1240px;margin:0 auto}
+header{position:sticky;top:0;z-index:20;background:var(--field);color:var(--fieldInk)}
+.bar{display:flex;align-items:center;gap:20px;padding:10px max(5vw,16px);max-width:1340px;margin:0 auto;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}.logo b{font-size:20px;font-weight:900}.logo small{display:block;font-size:13px;opacity:.8}
+nav{display:flex;gap:4px;overflow-x:auto;flex:1}nav a{flex:none;text-decoration:none;padding:10px 12px;border-radius:8px;font-size:15px;opacity:.85}
+nav a.on,nav a:hover{background:rgba(255,255,255,.14);opacity:1}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.pri{background:var(--field);color:var(--fieldInk);border-color:transparent}.btn.acc{background:var(--acc);color:#fff;border-color:transparent}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--rice);outline-offset:2px}
+.view{display:none}.view.on{display:block}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(20px,4vw,48px);align-items:center}
+.lead{font-size:17px;color:var(--mute);max-width:36em}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.stats b{font-size:32px;font-weight:900;display:block;line-height:1}.stats span{font-size:14px;color:var(--mute)}
+.mapbox{background:var(--soft);border-radius:18px;border:1px solid var(--line);position:relative;overflow:hidden}
+.mapbox svg{display:block;width:100%;height:auto;max-height:78vh}
+.land{fill:light-dark(#d9e6cf,#203a2a);stroke:light-dark(#9db592,#3e6b4d);stroke-width:.6}
+.ridge{fill:none;stroke:light-dark(#b7cba8,#2e5039);stroke-width:2.2;stroke-linecap:round;opacity:.8}
+.grid line{stroke:light-dark(#e3ebdf,#183022);stroke-width:.25}
+.pin{cursor:pointer}.pin circle.halo{opacity:.25}.pin.sel circle.core{stroke:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--mute);padding:10px 14px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff;white-space:nowrap}
+.t-pre{background:var(--pre)}.t-mid{background:var(--mid)}.t-post{background:var(--post)}
+.muted{color:var(--mute)}.small{font-size:14px}
+.track{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:14px 0}
+.track div{font-size:12.5px;line-height:1.3;padding-top:10px;border-top:5px solid var(--line);color:var(--mute)}
+.track div.done{border-color:var(--field);color:var(--ink)}.track div.now{border-color:var(--acc);color:var(--ink);font-weight:700}
+ul.facts{padding-left:1.2em;margin:8px 0}ul.facts li{margin:4px 0}
+.risk{background:light-dark(#fff1ec,#2a1710);border-left:4px solid var(--acc);padding:10px 14px;border-radius:8px;font-size:15px;margin-top:10px}
+.plist{display:grid;gap:10px;max-height:70vh;overflow:auto;padding-right:4px}
+.pitem{text-align:left;width:100%;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.pitem:hover,.pitem.sel{border-color:var(--field);box-shadow:0 0 0 2px var(--field) inset}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13.5px;color:var(--mute);font-weight:700}td.n{text-align:right;white-space:nowrap}
+.scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:grid;gap:6px;font-size:14.5px;font-weight:700}
+input,select,textarea{font:inherit;font-size:16px;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:400}
+textarea{min-height:90px}.full{grid-column:1/-1}
+.kpi{display:flex;align-items:baseline;gap:6px}.kpi b{font-size:clamp(30px,4vw,44px);font-weight:900;line-height:1}
+.bars{display:grid;gap:10px}.brow{display:grid;grid-template-columns:7.5em minmax(0,1fr) 2.6em;gap:10px;align-items:center;font-size:15px}
+.btrack{height:12px;border-radius:6px;background:var(--soft);overflow:hidden}.bfill{height:100%;background:var(--field);border-radius:6px;transition:width .5s}
+.grade{display:inline-grid;place-items:center;width:84px;height:84px;border-radius:50%;font-size:40px;font-weight:900;color:#fff;background:var(--field);flex:none}
+.note{font-size:13.5px;color:var(--mute)}
+.banner{background:var(--rice);color:#1b2a12;border-radius:12px;padding:12px 16px;font-size:15px}
+.cmp td:first-child{font-weight:700;white-space:nowrap}
+footer{background:var(--field);color:var(--fieldInk);font-size:14px}footer a{color:var(--fieldInk)}
+.flow{display:flex;gap:8px;flex-wrap:wrap;counter-reset:s}.flow span{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14.5px}
+.dkpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.dkpi div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}.dkpi b{display:block;font-size:30px;font-weight:900;line-height:1.1}.dkpi span{font-size:14px;color:var(--mute)}
+.stackbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--soft)}.stackbar i{display:block;height:100%}
+.feed{padding:10px 0;border-bottom:1px solid var(--line)}.feed:last-child{border-bottom:0}.feed a{font-weight:700}
+.newtag{display:inline-block;font-size:12px;font-weight:700;color:#1b2a12;background:var(--rice);border-radius:6px;padding:0 6px;margin-left:4px}
+.risk-card ul{padding-left:1.1em;margin:8px 0}.risk-card li{margin:3px 0;font-size:15px}.risk-card .ex{font-size:14px;background:var(--soft);border-radius:8px;padding:8px 10px;margin-top:8px}
+.rk{display:grid;grid-template-columns:1.6em minmax(0,1fr) 3em;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.rk b.n{font-size:18px;color:var(--mute)}.rk .sc{font-weight:900;font-size:18px;text-align:right}
+.mxq{font-size:12px;fill:var(--mute)}
+.hide{display:none!important}
+.news{padding:10px 0;border-bottom:1px solid var(--line)}.news a{font-weight:700}
+@media(max-width:860px){.hero,.cols{grid-template-columns:minmax(0,1fr)}.plist{max-height:none}}
+@media(max-width:600px){.track{grid-template-columns:repeat(4,minmax(0,1fr))}table{font-size:13.5px}
+.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-7em;color:var(--mute);font-size:13px}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:reduce){.bfill{transition:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header><div class="bar">
+<a class="logo" href="#home"><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="2" width="32" height="32" rx="8" fill="#e8d36a"/><path d="M6 24h24M6 18h24M12 8v20M22 8v20" stroke="#1d4a33" stroke-width="2.4"/><circle cx="22" cy="18" r="4" fill="#d4502a"/></svg><span><b>相信土地</b><small>農地開發潛力平台</small></span></a>
+<nav id="nav">
+<a href="#home">首頁</a><a href="#map">開發地圖</a><a href="#listings">在售農地</a><a href="#report">潛力報告</a><a href="#post">我要刊登</a><a href="#compare">徵收重劃與佈局</a><a href="#calc">價差試算</a><a href="#tax">農地節稅</a><a href="#dash">市場動態</a>
+</nav></div></header>
+
+<main>
+<!-- 首頁 -->
+<section class="view band" id="v-home"><div class="wrap">
+<div class="hero">
+<div>
+<p class="small" style="font-weight:700;color:var(--field)">全台區段徵收・開發前中後追蹤</p>
+<h1>會變成建地的農地，<br>先看它離哪個開發案多近。</h1>
+<p class="lead">整理全台 22 縣市規劃中、辦理中與已完成的區段徵收、特定區、新訂擴大都市計畫與產業園區。選一塊農地，就能看到最近的開發案走到哪一步、未來變更為建地的機會，以及一份可以帶走的潛力分析報告。</p>
+<div class="chips" style="margin-top:20px"><a class="btn pri" href="#map">進入開發地圖 →</a><a class="btn" href="#dash">看市場動態</a><a class="btn" href="#report">產生潛力報告</a><a class="btn" href="#post">刊登我的農地</a></div>
+<div class="stats" id="homeStats"></div>
+</div>
+<div class="mapbox"><div id="heroMap"></div><div class="legend"><span><i class="dot" style="background:var(--pre)"></i>開發前（規劃・審議）</span><span><i class="dot" style="background:var(--mid)"></i>開發中（公告・工程）</span><span><i class="dot" style="background:var(--post)"></i>開發後（配地・成熟）</span></div></div>
+</div>
+</div></section>
+<!-- 市場動態儀表板 -->
+<section class="view band" id="v-dash"><div class="wrap">
+<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:end">
+<div><h2>市場動態儀表板</h2><p class="muted" style="margin:0">全台開發案進度與最新報導，每月 1 日自動更新。新聞更新於 <b id="dashAt">—</b>，案件資料查證 <b id="checked2"></b>。</p></div>
+<label style="min-width:220px">搜尋案名或鄉鎮<input id="dQ" type="search" placeholder="例：彰化、高鐵、橋科"></label>
+</div>
+<div class="chips" id="dRegion" style="margin-top:16px"></div>
+<div class="form" style="margin-top:12px">
+<label>縣市<select id="dCounty"><option value="">全部縣市</option></select></label>
+<label>開發階段<select id="dStage"><option value="">全部階段</option><option value="pre">開發前</option><option value="mid">開發中</option><option value="post">開發後</option></select></label>
+<label>計畫類型<select id="dType"><option value="">全部類型</option></select></label>
+<label>排序<select id="dSort"><option value="news">最新消息優先</option><option value="stage">開發階段（早→晚）</option><option value="county">縣市</option></select></label>
+</div>
+<div class="dkpi" id="dKpi"></div>
+<div class="cols" style="margin-top:20px">
+<div class="card"><h3>各區開發進度</h3><div id="dBars" class="bars" style="margin-top:12px"></div><p class="note" style="margin-top:12px"><i class="dot" style="background:var(--pre)"></i>開發前　<i class="dot" style="background:var(--mid)"></i>開發中　<i class="dot" style="background:var(--post)"></i>開發後</p></div>
+<div class="card"><h3>最新消息</h3><div id="dFeed"></div></div>
+</div>
+<div class="scroll" style="margin-top:20px"><table class="stack" id="dTable"><thead><tr><th>開發案</th><th>階段</th><th>最新消息</th><th>查證來源</th><th></th></tr></thead><tbody></tbody></table></div>
+<p class="note" id="dCount"></p>
+<details style="margin-top:16px"><summary class="small" style="cursor:pointer;font-weight:700">政府開放資料與查詢工具</summary><ul class="facts">
+<li><a href="https://data.gov.tw/dataset/13903">內政部：辦理區段徵收面積（按區域別）</a></li>
+<li><a href="https://data.gov.tw/dataset/147570">臺中市土地重劃工程處：辦理中區段徵收工程範圍、面積</a></li>
+<li><a href="https://data.gov.tw/dataset/147568">臺中市土地重劃工程處：區段徵收工程成果</a></li>
+<li><a href="https://lvr.land.moi.gov.tw/">內政部不動產交易實價查詢服務網</a></li>
+</ul><p class="note">各開發案資訊整理自政府公開資料與新聞報導，平台不保證即時，投資前請向主管機關確認。</p></details>
+</div></section>
+<section class="view band" id="v-home2" style="background:var(--soft)"><div class="wrap">
+<h2>投資一塊「未來建地」，要看三件事</h2>
+<div class="grid2" style="margin-top:16px">
+<div class="card"><h3>1. 開發走到哪一步</h3><p class="muted">從都市計畫擬定、土地徵收審議、徵收公告、工程到抵價地分配，每一站的不確定性與增值空間都不同。越早進場，空間越大、風險也越高。</p></div>
+<div class="card"><h3>2. 在範圍內，還是範圍外</h3><p class="muted">範圍內的地，可以選擇領回抵價地（通常 40%–50%）或領現金補償；範圍外則是享受外溢效應，價格隨周邊發展走，但不會被強制取得。</p></div>
+<div class="card"><h3>3. 分區與產權</h3><p class="muted">都市計畫農業區、一般農業區、特定農業區的變更難度差很多。持分土地、無臨路、訴訟中的開發案，都會影響未來的流動性。</p></div>
+</div>
+<h3 style="margin-top:28px">最新在售農地</h3>
+<div class="grid2" id="homeListings" style="margin-top:12px"></div>
+</div></section>
+
+<!-- 開發地圖 -->
+<section class="view band" id="v-map"><div class="wrap">
+<h2>全台開發地圖</h2>
+<p class="muted">依開發階段篩選，點地圖上的點或右側清單查看進度。資料查證至 <b id="checked1"></b>，請以政府公告為準。</p>
+<div class="chips" id="stageChips" style="margin:14px 0"></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:14px"><div class="chips" id="zoomChips"></div><label style="min-width:180px">縣市<select id="mCounty"><option value="">全部縣市</option></select></label></div>
+<div class="cols">
+<div><div class="mapbox"><div id="bigMap"></div><div class="legend"><span><i class="dot" style="background:var(--pre)"></i>開發前</span><span><i class="dot" style="background:var(--mid)"></i>開發中</span><span><i class="dot" style="background:var(--post)"></i>開發後</span><span>◆ 在售農地</span></div></div>
+<div class="card" id="projDetail" style="margin-top:16px"></div></div>
+<div class="plist" id="projList"></div>
+</div>
+</div></section>
+
+<!-- 在售農地 -->
+<section class="view band" id="v-listings"><div class="wrap">
+<h2>在售農地</h2>
+<p class="muted">每筆物件會自動算出離最近開發案的距離。標「示範」的物件只用來展示功能；標「會員刊登」的物件由刊登者提供，平台尚未審核，交易前請自行查證謄本與地籍圖。</p>
+<div class="form" style="margin:16px 0">
+<label>開發階段<select id="fStage"><option value="">全部</option><option value="pre">開發前</option><option value="mid">開發中</option><option value="post">開發後</option></select></label>
+<label>縣市<select id="fCounty"><option value="">全部</option></select></label>
+<label>與開發案距離<select id="fDist"><option value="99">不限</option><option value="1">1 公里內</option><option value="3">3 公里內</option><option value="5">5 公里內</option></select></label>
+<label>排序<select id="fSort"><option value="score">潛力分數高→低</option><option value="dist">距離近→遠</option><option value="price">單價低→高</option></select></label>
+</div>
+<div class="scroll"><table class="stack" id="listTable"><thead><tr><th>物件</th><th>分區</th><th>面積</th><th>開價單價</th><th>開價總價</th><th>最近開發案</th><th>潛力</th><th></th></tr></thead><tbody></tbody></table></div>
+<p class="note" id="dbNote"></p>
+</div></section>
+
+<!-- 物件詳情 -->
+<section class="view band" id="v-item"><div class="wrap" id="itemBody"></div></section>
+
+<!-- 潛力報告 -->
+<section class="view band" id="v-report"><div class="wrap">
+<h2>農地發展潛力分析報告</h2>
+<p class="muted">選一筆在售農地，或自己輸入條件。報告會依最近開發案的階段、距離、分區、產權與價格，算出五個面向的分數和抵價地情境試算。</p>
+<div class="cols" style="margin-top:16px">
+<form class="card form" id="rForm" onsubmit="return false">
+<label class="full">帶入在售物件<select id="rPick"><option value="">— 自行輸入 —</option></select></label>
+<label class="full">最近的開發案<select id="rProj"></select></label>
+<label>與開發案中心距離（公里）<input id="rDist" type="number" step="0.1" min="0" value="1.2"></label>
+<label>是否在開發範圍內<select id="rIn"><option value="0">範圍外（享外溢）</option><option value="1">範圍內（可領抵價地）</option></select></label>
+<label>使用分區<select id="rZone"><option>都市計畫農業區</option><option selected>一般農業區</option><option>特定農業區</option><option>山坡地保育區</option></select></label>
+<label>產權<select id="rOwn"><option>單獨所有</option><option>持分</option></select></label>
+<label>面積（坪）<input id="rArea" type="number" min="1" value="1000"></label>
+<label>開價單價（萬元/坪）<input id="rPrice" type="number" step="0.1" min="0" value="3.5"></label>
+<label>臨路寬度（公尺，0 = 無臨路）<input id="rRoad" type="number" min="0" value="6"></label>
+<label>預估未來建地單價（萬元/坪）<input id="rBuild" type="number" step="0.1" min="0" value="12"></label>
+<label class="full">抵價地比例：<span id="rRatioV">45%</span><input id="rRatio" type="range" min="40" max="50" value="45"></label>
+</form>
+<div class="card" id="rOut"></div>
+</div>
+</div></section>
+
+<!-- 刊登 -->
+<section class="view band" id="v-post"><div class="wrap">
+<h2>刊登我的農地</h2>
+<p class="muted">刊登後會出現在「在售農地」，系統自動計算與開發案的距離和潛力分數。座標可在 Google 地圖對著土地按右鍵複製。</p>
+<div class="banner" id="postState" style="margin:14px 0">正在連線刊登資料庫…</div>
+<form class="card form" id="pForm">
+<label>縣市<select id="pCounty" required></select></label>
+<label>鄉鎮市區<input id="pTown" required maxlength="20" placeholder="例：田中鎮"></label>
+<label>地段・地號（可只填地段）<input id="pSec" maxlength="40" placeholder="例：○○段 123 地號"></label>
+<label>使用分區<select id="pZone"><option>都市計畫農業區</option><option>一般農業區</option><option>特定農業區</option><option>山坡地保育區</option></select></label>
+<label>面積（坪）<input id="pArea" type="number" min="1" required></label>
+<label>開價單價（萬元/坪）<input id="pPrice" type="number" step="0.1" min="0" required></label>
+<label>產權<select id="pOwn"><option>單獨所有</option><option>持分</option></select></label>
+<label>臨路寬度（公尺）<input id="pRoad" type="number" min="0" value="4"></label>
+<label>緯度<input id="pLat" type="number" step="0.000001" required placeholder="例：23.8751"></label>
+<label>經度<input id="pLng" type="number" step="0.000001" required placeholder="例：120.5802"></label>
+<label>是否在開發範圍內<select id="pIn"><option value="0">範圍外 / 不確定</option><option value="1">範圍內</option></select></label>
+<label>聯絡方式（電話或 LINE ID）<input id="pContact" required maxlength="40"></label>
+<label class="full">物件說明<textarea id="pDesc" maxlength="400" placeholder="現況、水電、可否建農舍、是否有租約…"></textarea></label>
+<div class="full chips"><button class="btn acc" id="pSubmit" type="submit">送出刊登</button><span class="note" id="pMsg"></span></div>
+</form>
+<div id="myListings" style="margin-top:20px"></div>
+</div></section>
+
+<!-- 徵收與重劃 -->
+<section class="view band" id="v-compare"><div class="wrap">
+<h2>區段徵收、市地重劃、農地重劃差在哪？</h2>
+<p class="muted">三種都是「把零碎土地整理成可用土地」的方法，但對地主最大的差別是：地會不會被政府先拿走，以及最後能領回多少。</p>
+<div class="scroll" style="margin-top:16px"><table class="cmp"><thead><tr><th></th><th>區段徵收</th><th>市地重劃</th><th>農地重劃</th></tr></thead><tbody>
+<tr><td>法源</td><td>土地徵收條例</td><td>平均地權條例</td><td>農地重劃條例</td></tr>
+<tr><td>土地所有權</td><td>先全部徵收，再發還一部分</td><td>不移轉，重新分配位置</td><td>不移轉，重新分配位置</td></tr>
+<tr><td>地主拿回什麼</td><td>領現金補償（按市價），或申請領回抵價地</td><td>扣除負擔後的建築用地</td><td>扣除負擔後的農地</td></tr>
+<tr><td>領回比例</td><td>抵價地以徵收總面積 50% 為原則，不得少於 40%（曾經農地重劃者不少於 45%）</td><td>公共設施及費用負擔合計原則上不超過 45%，地主約領回 55% 以上</td><td>負擔較低，多為農路、水路用地</td></tr>
+<tr><td>使用分區變化</td><td>農地 → 住宅、商業、產業用地</td><td>多已是都市土地，整理後可建築</td><td>仍為農地</td></tr>
+<tr><td>增值空間</td><td>最大（地目變更）</td><td>中等（公設完善）</td><td>小（耕作條件改善）</td></tr>
+<tr><td>主要風險</td><td>期程長、爭議與訴訟、配地位置</td><td>期程、負擔比例</td><td>變現性仍受農地限制</td></tr>
+</tbody></table></div>
+<h3 style="margin-top:28px">區段徵收的七個步驟</h3>
+<div class="flow" id="flowSteps"></div>
+<p class="note" style="margin-top:14px">比例數字為法規原則，實際比例以內政部核定與各案公告為準。</p>
+
+<h2 style="margin-top:44px" id="risk">如何評估投資風險</h2>
+<p class="muted">開發題材農地的報酬，來自「時間」換「地目變更」。買進前，用下面六個面向逐項檢查，任一項出現紅燈，就要降低出價或縮小部位。</p>
+<div class="grid2" style="margin-top:16px" id="riskCards"></div>
+
+<h2 style="margin-top:44px" id="layout">低基期 × 高發展性：優先長期佈局的區域</h2>
+<p class="muted">長期佈局的原則很單純：在價格還沒反映之前，買進發展動能最強的地方。下圖把每個開發案依「價格基期」與「發展性」放進四個象限，左上角就是優先佈局區。</p>
+<div class="chips" id="mxRegion" style="margin:14px 0"></div>
+<div class="cols">
+<div class="card"><div class="fig" id="mxFig" style="min-height:420px"><svg id="mxSvg" role="img" aria-label="基期與發展性矩陣"></svg></div>
+<p class="note">橫軸：價格基期（越左越低）。縱軸：發展性（越上越高）。點的顏色為開發階段，滑過可看案名。</p></div>
+<div class="card"><h3>優先佈局排行</h3><p class="note" style="margin-top:-4px">排序分數＝發展性 60%＋低基期 40%</p><div id="mxRank"></div></div>
+</div>
+<details style="margin-top:16px"><summary class="small" style="cursor:pointer;font-weight:700">評分方法與各案依據</summary>
+<p class="small">發展性＝帶動力道（產業、交通、人口，1–5 級）＋開發確定性（進度越後越確定）－風險扣分。價格基期＝區域價格帶（1–5 級，依報導中的房價、標售底價與農地行情推估）＋進度（越後期價格越已反映）。等級為平台初步判斷，請以實價登錄校正。</p>
+<div class="scroll"><table class="stack" id="mxTable"><thead><tr><th>開發案</th><th>發展性</th><th>基期</th><th>判斷依據</th></tr></thead><tbody></tbody></table></div></details>
+
+<h3 style="margin-top:32px">長期佈局的六個做法</h3>
+<div class="grid2" style="margin-top:12px">
+<div class="card"><h3>1. 選「早期＋強動能」</h3><p class="muted">開發前、但背後有科學園區、高鐵或國家重大建設撐腰的案子，增值空間最大。只有地方題材、沒有產業進駐的案子要更保守。</p></div>
+<div class="card"><h3>2. 範圍外 1–3 公里卡位</h3><p class="muted">範圍內的地會被徵收、只能領回 4–5 成抵價地；範圍外的外溢圈保留全部持分，又能吃到道路與人口紅利，是長期持有的甜蜜點。</p></div>
+<div class="card"><h3>3. 挑容易變更的地</h3><p class="muted">都市計畫農業區、一般農業區優先，特定農業區最難變更。單獨所有、臨 6 米以上道路、方整的地，未來最好賣。</p></div>
+<div class="card"><h3>4. 分批進場</h3><p class="muted">以開發里程碑分段加碼：都委會通過、土徵小組通過、徵收公告、工程開工。每過一關，確定性提高，再投入下一筆資金。</p></div>
+<div class="card"><h3>5. 用農業使用壓低持有成本</h3><p class="muted">持續作農業使用，可適用田賦停徵、移轉免土增稅等優惠；出租給農民耕作，還能有現金流。資金以自有為主，避免用短期借款撐長期題材。</p></div>
+<div class="card"><h3>6. 先想好出場點</h3><p class="muted">常見三個出場點：徵收公告前後（題材最熱）、公共工程完工（道路成形）、配地後建地標售行情確立。每個開發案設定一個主要出場點和停損條件。</p></div>
+</div>
+<p class="note" style="margin-top:14px">以上為一般性分析架構，非投資建議；個案請搭配謄本、都市計畫書圖與實價登錄評估，並委由合格不動產經紀業辦理交易。</p>
+</div></section>
+
+<!-- 價差試算 -->
+<section class="view band" id="v-calc"><div class="wrap">
+<h2>價差怎麼算？</h2>
+<p class="muted">用「買進農地的成本」對比「領回抵價地的未來價值」，看看倍數與年化報酬。這是簡化模型：實際配地依權利價值計算，並可能有差額地價。</p>
+<div class="cols" style="margin-top:16px">
+<form class="card form" onsubmit="return false">
+<label>農地面積（坪）<input id="cArea" type="number" value="1000" min="1"></label>
+<label>買進單價（萬元/坪）<input id="cBuy" type="number" value="3.5" step="0.1" min="0"></label>
+<label>抵價地比例（%）<input id="cRatio" type="number" value="45" min="40" max="50"></label>
+<label>預估建地單價（萬元/坪）<input id="cBuild" type="number" value="12" step="0.1" min="0"></label>
+<label>預估持有年數<input id="cYears" type="number" value="6" min="1" max="30"></label>
+<label>年持有成本（萬元，含資金成本）<input id="cHold" type="number" value="20" min="0"></label>
+</form>
+<div class="card" id="cOut"></div>
+</div>
+</div></section>
+
+<!-- 農地節稅 -->
+<section class="view band" id="v-tax"><div class="wrap">
+<h2>農地節稅重點</h2>
+<p class="muted">農地的稅負優惠，前提幾乎都是「作農業使用」，並取得農業用地作農業使用證明書。以下為法規原則，個案請洽地政士或會計師。</p>
+<div class="grid2" style="margin-top:16px">
+<div class="card"><h3>土地增值稅</h3><p>作農業使用的農業用地，移轉給自然人時可申請不課徵土地增值稅（土地稅法第 39 條之 2）。日後再移轉，以前次不課徵時的現值為原地價。</p></div>
+<div class="card"><h3>遺產稅・贈與稅</h3><p>繼承或贈與作農業使用的農業用地，價值可自遺產或贈與總額中扣除；承受人需繼續作農業使用滿 5 年，否則追繳。</p></div>
+<div class="card"><h3>地價稅・田賦</h3><p>作農業使用的農業用地課徵田賦而非地價稅，目前田賦停徵，持有成本相對低。</p></div>
+<div class="card"><h3>區段徵收時</h3><p>被區段徵收的土地免徵土地增值稅；領回抵價地後第一次移轉，土地增值稅減徵 40%（土地徵收條例第 47 條）。</p></div>
+<div class="card"><h3>想蓋農舍</h3><p>一般須取得農地滿 2 年、面積達 0.25 公頃以上，且本人無自用住宅等條件（農業用地興建農舍辦法）。各縣市另有規定。</p></div>
+<div class="card"><h3>投資提醒</h3><p>持分農地、違規使用（鐵皮、填土）會讓證明書申請不過，等於失去節稅優惠，購買前務必現勘。</p></div>
+</div>
+</div></section>
+
+</main>
+
+<footer class="band"><div class="wrap" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div><b>相信土地｜農地開發潛力平台</b><br>本平台提供資訊整理與試算，非投資建議；不動產交易請委由合格不動產經紀業辦理。</div>
+<div>資料查證：<span id="checked3"></span></div>
+</div></footer>
+
+<script>
+{
+const CHECKED='2026-11-25';
+const STEPS=['都市計畫擬定','公益必要性審議','徵收公告','補償・抵價地申請','公共工程','抵價地分配・標售','發展成熟'];
+const STAGE={pre:'開發前',mid:'開發中',post:'開發後'};
+const stageOf=s=>s<=1?'pre':s<=4?'mid':'post';
+const P=[
+/* ===== 北部 ===== */
+{id:'tyaero',name:'桃園航空城附近地區特定區',county:'桃園市',town:'大園・蘆竹',lat:25.07,lng:121.22,type:'區段徵收',step:4,area:'計畫 4,564 公頃，徵收約 3,148 公頃',facts:['台灣史上最大區段徵收案，影響居民逾三萬人','安置住宅與安置街廓點交延宕，最後搬遷期限延至 2026 年底','2023 年北高行判部分居民勝訴，訴訟仍在進行'],risk:'訴訟與安置爭議多，抵價地分配與交地時程可能再延。',pen:15,src:'https://news.pts.org.tw/article/812941',srcN:'公視新聞網'},
+{id:'tamsui',name:'淡海智慧科技城',county:'新北市',town:'淡水',lat:25.19,lng:121.44,type:'區段徵收',step:0,area:'約 130 公頃',facts:['2026 年 12 月辦理環評現勘及公聽會','2027 年第 1 季都市計畫送內政部都委會審議','最快 2029 年同步啟動區段徵收工程與廠商進駐，比照橋科模式'],risk:'仍在環評與都市計畫階段，範圍與時程都可能調整。',pen:0,src:'https://ec.ltn.com.tw/article/breakingnews/5635252',srcN:'自由時報'},
+{id:'fengjiang',name:'擴大楓江附近地區',county:'新北市',town:'五股・泰山・新莊',lat:25.06,lng:121.445,type:'區段徵收',step:0,area:'計畫約 309 公頃',facts:['2026 年 1 月主要計畫通過新北市都委會，續報內政部','定位產業型發展，配合五股交流道增設匝道與五泰輕軌','以區段徵收引入知識型產業與企業總部'],risk:'內政部審議尚未完成。',pen:0,src:'https://www.setn.com/klist/90369',srcN:'三立新聞網'},
+{id:'puqian',name:'板橋埔墘 4-7 區',county:'新北市',town:'板橋・中和交界',lat:25.0,lng:121.475,type:'區段徵收',step:2,area:'私有地約 3 公頃',facts:['同意區段徵收的私有地比例約 75%','2026 年 9 月 23 日內政部審議修正後通過','新設三條道路，縫合板橋與中和間未開發區域'],risk:'規模小，抵價地配回位置有限。',pen:0,src:'https://money.udn.com/money/story/5621/9782753',srcN:'經濟日報'},
+{id:'bitan',name:'新店碧潭大橋北側（F 單元）',county:'新北市',town:'新店',lat:24.965,lng:121.53,type:'區段徵收',step:1,area:'約 21.76 公頃',facts:['已辦理事業計畫公聽會暨地上物查估前說明會','土地所有權人約 150 餘人，建物約 180 餘間','現況多為砂石場、雜林與草地'],risk:'',pen:0,src:'https://udn.com/news/story/7323/9023809',srcN:'聯合新聞網'},
+{id:'shulin',name:'樹林機五（新北大巨蛋）',county:'新北市',town:'樹林',lat:24.985,lng:121.42,type:'區段徵收',step:0,area:'—',facts:['新北大巨蛋確定落腳樹林機五，基地大部分為農業區','市府先啟動都市計畫變更，最快 2027 年公開展覽','都市計畫核定後由地政局啟動區段徵收'],risk:'仍在都市計畫草案階段。',pen:0,src:'https://udn.com/news/story/7323/9643670',srcN:'聯合新聞網'},
+{id:'ankeng',name:'安坑輕軌沿線區段徵收',county:'新北市',town:'新店',lat:24.95,lng:121.51,type:'區段徵收',step:0,area:'D、H、I 單元共 83.39 公頃',facts:['2023 年新北市通過第三次通盤檢討，提送內政部','其中 2.88 公頃規劃為社會住宅用地'],risk:'本筆資料較舊（2023），請查最新審議進度。',pen:5,src:'https://www.setn.com/klist/8698',srcN:'三立新聞網'},
+{id:'shezi',name:'社子島開發計畫',county:'臺北市',town:'士林',lat:25.105,lng:121.49,type:'區段徵收',step:1,area:'—',facts:['2025 年 12 月臺北市政府辦理區段徵收公聽會','自救會到場表達反對，現場爆發推擠衝突'],risk:'居民反對聲浪高，進度不確定性大。',pen:20,src:'https://www.setn.com/klist/90369',srcN:'三立新聞網'},
+{id:'beishike',name:'北投士林科技園區（北士科）',county:'臺北市',town:'北投・士林',lat:25.095,lng:121.515,type:'區段徵收',step:6,area:'—',facts:['輝達總部確定進駐 T17、T18 基地','市府已修正法源並完成新光解約'],risk:'已是成熟都市土地，周邊少有農地。',pen:0,src:'https://www.setn.com/klist/90369',srcN:'三立新聞網'},
+{id:'taizhi',name:'臺灣知識經濟旗艦園區（原璞玉計畫）',county:'新竹縣',town:'竹北・芎林',lat:24.80,lng:121.05,type:'區段徵收',step:1,area:'447 公頃，其中約 360 公頃區段徵收',facts:['2015 年行政院列為國家重大建設','2024 年 5 月內政部專案小組決議：先由經濟部辦理聽證，再送都委會大會','涉及特定農業區，影響約 4 千農戶'],risk:'農地保育爭議大，2016 年曾未通過都委會。',pen:15,src:'https://news.ltn.com.tw/news/HsinchuCounty/breakingnews/5418590',srcN:'自由時報'},
+{id:'hsp3',name:'竹科三期（二重埔）',county:'新竹縣',town:'竹東・芎林',lat:24.75,lng:121.07,type:'區段徵收',step:1,area:'—',facts:['2025 年 8 月公益性及必要性評估報告經內政部土徵小組審查完成','都市計畫仍在內政部專案小組審議中（2026 年 9 月）','國道 3 號增設二重交流道進行可行性研究'],risk:'自救會反對超額徵收，審議期程未定。',pen:5,src:'https://www.ctee.com.tw/news/20260918700016-431206',srcN:'工商時報'},
+{id:'mlhsr',name:'高鐵苗栗車站特定區',county:'苗栗縣',town:'後龍',lat:24.605,lng:120.825,type:'區段徵收',step:6,area:'—',facts:['高鐵至新竹約 11 分鐘、至台中約 18 分鐘','站區新建案仍在 3 字頭，低於竹北與烏日','後龍科學產業園區串聯桃竹苗大矽谷'],risk:'',pen:0,src:'https://www.mirrormedia.mg/story/20260325mkt001',srcN:'鏡週刊'},
+{id:'ylhsr',name:'高鐵宜蘭車站特定區',county:'宜蘭縣',town:'宜蘭市（縣政中心南側）',lat:24.735,lng:121.755,type:'區段徵收',step:0,area:'約 420 公頃',facts:['2026 年 7 月 23 日行政院核定高鐵延伸宜蘭，目標 2036–2037 年通車','縣府完成地籍清理後辦理公開展覽，鐵道局盼 2027 年中內政部審議完成','縣府表示待都市計畫完成後提出區段徵收計畫'],risk:'監察院指範圍由 190 擴大至 420 公頃缺乏論據；選址後農地喊價已翻數倍。',pen:10,src:'https://news.pts.org.tw/article/819502',srcN:'公視新聞網'},
+/* ===== 中部 ===== */
+{id:'jiude',name:'臺中烏日九德地區',county:'臺中市',town:'烏日',lat:24.11,lng:120.65,type:'區段徵收',step:4,area:'約 29.87 公頃',facts:['2022 年 10 月公告區段徵收，補償費已發放','2024 年 11 月 21 日開工，預計 2027 年 12 月 31 日完工','全台中唯一捷運、台鐵、高鐵三鐵共構區段'],risk:'都市計畫第二次專案變更中，邊界與道路截角仍在調整。',pen:0,src:'https://www.taichung.gov.tw/media/1343839/公展說明會會議紀錄-南區-烏日-南屯.pdf',srcN:'臺中市政府'},
+{id:'qianzhu',name:'臺中烏日前竹地區',county:'臺中市',town:'烏日',lat:24.085,lng:120.62,type:'區段徵收',step:2,area:'—',facts:['2018 年 10 月公告區段徵收','部分地主行政訴訟仍在臺中高等行政法院審理（2026 年）'],risk:'後續配地進度未查證，請向臺中市地政局確認。',pen:10,src:'https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/76963',srcN:'監察院'},
+{id:'xiatian',name:'大里夏田產業園區',county:'臺中市',town:'大里',lat:24.085,lng:120.665,type:'產業園區',step:0,area:'—',facts:['地主逾 1,800 人，意願問卷回收率 26%、同意約 56%','市府目標回收率 6 成、同意 7 成才推動','目的為輔導未登記工廠進駐、汙染農地轉型'],risk:'地主同意度未達門檻，可能延宕。',pen:15,src:'https://udn.com/news/story/7241/9516599',srcN:'聯合新聞網'},
+{id:'tucheng',name:'大里塗城產業型都市計畫',county:'臺中市',town:'大里',lat:24.115,lng:120.705,type:'產業園區',step:0,area:'—',facts:['地主問卷回收率約 75% 已達標','同意比率約 53%，仍待溝通'],risk:'同意比率未達 7 成目標。',pen:10,src:'https://udn.com/news/story/7241/9516599',srcN:'聯合新聞網'},
+{id:'xinan',name:'烏日溪南產業型特定區',county:'臺中市',town:'烏日',lat:24.07,lng:120.61,type:'產業園區',step:0,area:'—',facts:['與擴大神岡同列市府推動的產業園區','地主問卷回收率僅 1 至 4 成區間，共識待凝聚'],risk:'地主意願偏低。',pen:20,src:'https://news.ltn.com.tw/news/life/breakingnews/5445246',srcN:'自由時報'},
+{id:'shengang',name:'擴大神岡產業園區',county:'臺中市',town:'神岡',lat:24.265,lng:120.665,type:'產業園區',step:0,area:'—',facts:['市府辦理地主意願調查','問卷回收與同意比例不佳'],risk:'地主意願偏低。',pen:20,src:'https://news.ltn.com.tw/news/life/breakingnews/5445246',srcN:'自由時報'},
+{id:'tanzi',name:'潭子聚興產業園區',county:'臺中市',town:'潭子',lat:24.215,lng:120.70,type:'產業園區',step:6,area:'—',facts:['2026 年 2 月完工啟用，產業用地全數招商','22 家原農地鐵皮工廠進駐，投資逾 76 億元','預估年產值 50 億元、1,100 個就業機會'],risk:'',pen:0,src:'https://www.ctee.com.tw/news/20260129701822-430503',srcN:'工商時報'},
+{id:'chhsr',name:'高鐵彰化車站特定區',county:'彰化縣',town:'田中',lat:23.875,lng:120.575,type:'區段徵收',step:6,area:'全區約 204 公頃，區徵約 184 公頃',facts:['持續標售剩餘配餘地；住宅區底價約每坪 12.6 萬、產專區約 14.2 萬','10 公頃樂齡健康產業園區兩度流標，2026 年 7 月第三次標售','周邊住宅實價 2022 年曾達每坪 19 萬，2025 年 3 月後回到 13–15 萬'],risk:'產專區近年去化放緩，底價已接近行情。',pen:0,src:'https://udn.com/news/story/7241/9301802',srcN:'聯合新聞網'},
+{id:'ylic',name:'員林交流道附近特定區',county:'彰化縣',town:'溪湖・埔心',lat:23.94,lng:120.51,type:'特定區計畫',step:0,area:'約 929.51 公頃',facts:['縣府啟動細部計畫規劃，劃設住宅區、乙種工業區、農產品展售專用區','計畫年期至民國 125 年，計畫人口約 16,750 人','2026 年縣都委會審議配合 148 線溪湖外環道的主要計畫變更'],risk:'細部計畫尚未發布，整體開發方式（區徵或重劃）待確認。',pen:5,src:'https://www.ctee.com.tw/news/20250224701264-431206',srcN:'工商時報'},
+{id:'chic',name:'彰化交流道附近特定區（通盤檢討）',county:'彰化縣',town:'彰化・和美・花壇・秀水',lat:24.06,lng:120.52,type:'特定區計畫',step:0,area:'橫跨四鄉鎮',facts:['通盤檢討將評估既有農業區轉型發展','彰化第 2 交流道規劃以彰美路為聯絡道，預計 2035 年底完工','列入縣府向中央爭取的 11 項重大建設'],risk:'農業區轉型範圍與方式未定。',pen:5,src:'https://udn.com/news/story/7325/9297721',srcN:'聯合新聞網'},
+{id:'shuiwujin',name:'彰化水五金田園生產聚落特定區',county:'彰化縣',town:'鹿港・頂番婆',lat:24.075,lng:120.45,type:'特定區計畫',step:0,area:'計畫約 785 公頃',facts:['2018 年行政院列為國家重大建設','30 公頃產業專區與 80 公頃住宅區取消分期、一併送審','2026 年 2 月送內政部，總統表示年底前完成審議'],risk:'外環道徵收與特定工廠意願仍有爭議。',pen:0,src:'https://udn.com/news/story/7241/9438866',srcN:'聯合新聞網'},
+{id:'chcity',name:'擴大彰化市都市計畫',county:'彰化縣',town:'彰化市東區',lat:24.07,lng:120.565,type:'新訂擴大都計',step:0,area:'約 596 公頃，分 4 階段',facts:['第一階段優先開發台化廠區再發展區約 70 公頃','其餘分為已開發區、優先發展區、農業生產保留區','列入縣府向中央爭取的重大建設'],risk:'全區分期長，農業生產保留區短期不變更。',pen:5,src:'https://smart.businessweekly.com.tw/business/indep/1002845',srcN:'商周'},
+{id:'erlin',name:'二林精密機械產業園區',county:'彰化縣',town:'二林・芳苑',lat:23.93,lng:120.36,type:'產業園區',step:0,area:'約 352 公頃（台糖萬興農場）',facts:['2014 年送環評，2026 年 9 月 9 日環評大會決議「補正後提委員會再審」','開發單位須於 2026 年 12 月 31 日前補正','鄰近中科二林園區'],risk:'環評超過 10 年未過，農業部曾主張優先維持農業使用。',pen:20,src:'https://news.pts.org.tw/article/826468',srcN:'公視新聞網'},
+{id:'zhongxing',name:'中興新村活化',county:'南投縣',town:'南投市',lat:23.955,lng:120.685,type:'活化計畫',step:4,area:'—',facts:['國發會投入約 15 億元，分北、中、南三核心','南核心交由中興大學發展大學城，中核心朝商業與休閒','第二期中程計畫將導入婚育宅、餐廳與住宿'],risk:'全區為文化景觀，只能保留原貌修繕，非區段徵收、周邊農地不會因此變更。',pen:25,src:'https://udn.com/news/story/6656/9873250',srcN:'聯合新聞網'},
+{id:'mailiao',name:'擬定麥寮（豐津地區）都市計畫',county:'雲林縣',town:'麥寮',lat:23.79,lng:120.24,type:'新訂擴大都計',step:0,area:'約 176 公頃',facts:['配合縣國土計畫定位「台西麥寮工業發展核心」','2026 年 6 月政策環評專案小組要求 9 月 30 日前補正','計畫人口訂為 4,000 人，整合六輕下游工廠'],risk:'政策環評尚未通過。',pen:5,src:'https://udn.com/news/story/7266/9571939',srcN:'聯合新聞網'},
+{id:'huwei',name:'高鐵雲林車站特定區',county:'雲林縣',town:'虎尾',lat:23.735,lng:120.415,type:'區段徵收',step:6,area:'—',facts:['2026 年公告地價漲幅 4.46%，全縣居冠','建案持續推出，虎尾擴大都市計畫推動中'],risk:'',pen:0,src:'https://udn.com/news/story/7326/9221200',srcN:'聯合新聞網'},
+{id:'huwei2',name:'擴大虎尾都市計畫・擴大中科虎尾園區',county:'雲林縣',town:'虎尾',lat:23.715,lng:120.44,type:'新訂擴大都計',step:0,area:'—',facts:['中科虎尾園區核配率已達 98.27%','擴大中科虎尾園區及周邊地區列為中長期城鄉發展地區，規劃納入高鐵以西','另規劃 29.7 公頃虎尾產業園區（台糖地）'],risk:'中長期計畫，期程未定。',pen:5,src:'https://sptw.nlma.gov.tw/Files/Library/523a8c0e-dcd9-4583-ae04-ff40d03a9b71.pdf',srcN:'國土管理署'},
+/* ===== 南部 ===== */
+{id:'cyseat',name:'嘉義擴大縣治所在地（高鐵特定區）',county:'嘉義縣',town:'太保・朴子',lat:23.46,lng:120.33,type:'市地重劃',step:1,area:'約 367 公頃',facts:['全台規模最大的市地重劃案','鄰近嘉義科學園區、台積電先進封裝廠與馬稠後園區','華泰名品城 Outlet 第一期預計 2028 年營運'],risk:'市地重劃非區段徵收，地主領回比例依負擔計算。',pen:0,src:'https://newtalk.tw/news/view/2026-06-25/1043248',srcN:'新頭殼'},
+{id:'machouhou',name:'馬稠後產業園區',county:'嘉義縣',town:'鹿草',lat:23.43,lng:120.30,type:'產業園區',step:6,area:'後期產業用地 111 公頃',facts:['後期 111 公頃已全數售罄，逾 95 家廠商進駐','另有 44.47 公頃半導體供應鏈衛星園區出租，前 2 年免租金'],risk:'',pen:0,src:'https://www.ctee.com.tw/news/20260416701976-431206',srcN:'工商時報'},
+{id:'jiabei',name:'嘉北車站周邊區段徵收',county:'嘉義市',town:'西區',lat:23.50,lng:120.445,type:'區段徵收',step:0,area:'—',facts:['配合鐵路高架化（2029 年底完工）與嘉北車站改建','以「健康幸福城」醫療照護產業為主軸','都市計畫預計 2026 年底公開展覽'],risk:'',pen:0,src:'https://udn.com/news/story/7326/9576165',srcN:'聯合新聞網'},
+{id:'cyind',name:'嘉義市產業發展專區（北港路兩側）',county:'嘉義市',town:'西區',lat:23.49,lng:120.42,type:'特定區計畫',step:0,area:'—',facts:['推動超過 20 年，2025 年獲內政部同意以個案變更續審','2025 年 10 月 31 日起重新公開展覽 30 日'],risk:'',pen:5,src:'https://www.ctee.com.tw/news/20251122700734-431401',srcN:'工商時報'},
+{id:'nanke',name:'南科特定區開發區塊 A・B・C・D・E・N・O',county:'臺南市',town:'善化・新市・安定',lat:23.11,lng:120.29,type:'區段徵收',step:3,area:'約 431 公頃（公共設施 182 公頃）',facts:['2025 年 11 月 17 日至 12 月 16 日辦理徵收公告','地主逾 2,000 人，可選補償費或申請抵價地','滿足約 4 萬名移居人口需求'],risk:'',pen:0,src:'https://ec.ltn.com.tw/article/breakingnews/5640602',srcN:'自由時報'},
+{id:'tntech',name:'臺南科技產業專區（中西區學產地）',county:'臺南市',town:'中西區',lat:23.0,lng:120.165,type:'區段徵收',step:1,area:'—',facts:['魚塭學產地轉型科技產業專區','已辦兩場公聽會，區段徵收計畫書預計 2026 年送內政部'],risk:'',pen:0,src:'https://udn.com/news/story/7326/9541346',srcN:'聯合新聞網'},
+{id:'shalun',name:'高鐵臺南車站特定區（沙崙科學城）',county:'臺南市',town:'歸仁',lat:22.925,lng:120.285,type:'區段徵收',step:6,area:'—',facts:['沙崙智慧綠能科學城 166 家廠商進駐，進駐率 90.22%','成大醫院沙崙院區預計 2026 年 8 月核發建照','高鐵周邊預售屋 4 字頭已成常態'],risk:'',pen:0,src:'https://udn.com/news/story/7238/9638804',srcN:'聯合新聞網'},
+{id:'qiaotou',name:'高雄新市鎮第二期（橋頭科學園區）',county:'高雄市',town:'橋頭・燕巢',lat:22.78,lng:120.33,type:'區段徵收',step:6,area:'352.44 公頃（產業專用區 186.49 公頃）',facts:['區徵公共工程完工，主要道路 2025 年 12 月 26 日啟用','已超過 30 家廠商進駐','國道 1 號橋科匝道 2026 年 8 月動工，預計 2029 年 7 月完工'],risk:'',pen:0,src:'https://www.cna.com.tw/news/aloc/202608050186.aspx',srcN:'中央社'},
+{id:'ns3',name:'高雄新市鎮第三期',county:'高雄市',town:'橋頭・楠梓',lat:22.755,lng:120.30,type:'區段徵收',step:1,area:'—',facts:['內政部都委會已審議通過','保留約 21 公頃橋仔頭糖廠文化景觀保存區'],risk:'仍需完成區段徵收審議與公告。',pen:0,src:'https://udn.com/news/story/7314/9642183',srcN:'聯合新聞網'},
+{id:'dashe',name:'高雄大社區段徵收',county:'高雄市',town:'大社',lat:22.73,lng:120.35,type:'區段徵收',step:1,area:'約 96 公頃（住宅區 56 公頃）',facts:['2025 年 12 月 17 日內政部土徵小組審議通過','2026 年 9 月內政部都委會審議通過，逾 7 成地主同意','鄰近橋科與仁武產業園區'],risk:'範圍內有旗山斷層錯動帶，已規劃為公設。',pen:0,src:'https://cna.com.tw/news/aloc/202609150134.aspx',srcN:'中央社'},
+{id:'nuk',name:'高雄大學區段徵收區',county:'高雄市',town:'楠梓',lat:22.73,lng:120.285,type:'區段徵收',step:6,area:'—',facts:['2026 年 6 月標售住三土地約 999.86 坪，底價每坪 55.21 萬元','受惠後勁溪整治、新台 17 線與科技廊帶'],risk:'',pen:0,src:'https://wantrich.chinatimes.com/news/20260617900554-420101',srcN:'旺得富'},
+{id:'k205',name:'第 205 兵工廠區段徵收',county:'高雄市',town:'鳳山',lat:22.635,lng:120.365,type:'區段徵收',step:3,area:'分三期三區',facts:['取得特貿區土地及大型公園等公共設施','列入高雄市地政局 2025 年度施政重點'],risk:'',pen:0,src:'https://orgws.kcg.gov.tw/001/KcgOrgUploadFiles/412/relfile/74256/66470/169b1717-e37e-4ad0-8735-0757a980b08e.pdf',srcN:'高雄市政府'},
+{id:'pthsr',name:'高鐵屏東車站特定區',county:'屏東縣',town:'六塊厝',lat:22.665,lng:120.52,type:'特定區計畫',step:4,area:'307.15 公頃（南科屏東園區 73.51 公頃）',facts:['台積電統籌半導體供應鏈專區，2026 年 6 月聯合動土','高鐵延伸屏東進入二階環評，目標 2039 年通車','第二期發展區細部計畫與公辦都更已公告實施'],risk:'高鐵通車時程長，短期以產業園區帶動為主。',pen:0,src:'https://ec.ltn.com.tw/article/breakingnews/5412430',srcN:'自由時報'},
+/* ===== 東部 ===== */
+{id:'hualien',name:'整併及擴大大花蓮都市計畫',county:'花蓮縣',town:'花蓮市・吉安',lat:23.98,lng:121.59,type:'新訂擴大都計',step:0,area:'城 2-3 共 4 處約 69.22 公頃（含其他案）',facts:['花蓮縣國土計畫列為城鄉發展地區第 2 類之 3','分為整併及擴大大花蓮都市計畫 Ⅰ、Ⅱ 兩案'],risk:'屬國土計畫指認，實際都市計畫尚未擬定。',pen:5,src:'https://www.nlma.gov.tw/uploads/files/0d686885cf5b48bac700f4c13b96b44e.pdf',srcN:'國土管理署'},
+{id:'taitung',name:'台東市豐榮・豐樂（南區）',county:'臺東縣',town:'台東市',lat:22.76,lng:121.13,type:'區段徵收',step:5,area:'—',facts:['2026 年 4 月 24 日發放權狀，67 位地主領取','歷經 10 次流標、歷時 6 年，進入實質建設'],risk:'過去多次流標，市場承接力需觀察。',pen:5,src:'https://news.ltn.com.tw/amp/news/life/breakingnews/5414365',srcN:'自由時報'}
+];
+const DEMO=[
+{id:'d1',demo:1,county:'彰化縣',town:'田中鎮',sec:'示範段',zone:'一般農業區',area:1210,price:4.2,own:'單獨所有',road:6,lat:23.868,lng:120.585,inR:0,desc:'高鐵彰化站特定區南側，方正、臨 6 米路。'},
+{id:'d2',demo:1,county:'臺南市',town:'善化區',sec:'示範段',zone:'特定農業區',area:1530,price:3.6,own:'單獨所有',road:4,lat:23.12,lng:120.305,inR:1,desc:'位於南科特定區開發區塊內，可申請抵價地。'},
+{id:'d3',demo:1,county:'高雄市',town:'大社區',sec:'示範段',zone:'都市計畫農業區',area:820,price:7.8,own:'單獨所有',road:8,lat:22.735,lng:120.345,inR:1,desc:'大社 96 公頃區段徵收範圍內，鄰近橋科。'},
+{id:'d4',demo:1,county:'新北市',town:'淡水區',sec:'示範段',zone:'一般農業區',area:640,price:9.5,own:'持分',road:0,lat:25.185,lng:121.452,inR:0,desc:'淡海智慧科技城周邊，持分出售。'},
+{id:'d5',demo:1,county:'屏東縣',town:'屏東市',sec:'示範段',zone:'一般農業區',area:950,price:4.8,own:'單獨所有',road:6,lat:22.655,lng:120.53,inR:0,desc:'高鐵屏東特定區外緣，南科屏東園區 1 公里內。'},
+{id:'d6',demo:1,county:'新竹縣',town:'芎林鄉',sec:'示範段',zone:'特定農業區',area:1800,price:5.2,own:'單獨所有',road:4,lat:24.76,lng:121.08,inR:0,desc:'竹科三期計畫周邊，早期卡位題材。'}
+];
+let MEMBER=[],MINE=[],uid=null,db=null,canW=null,isOwner=false;
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(v,d=0)=>Number(v).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d});
+const money=w=>w>=10000?num(w/10000,2)+' 億':num(w,0)+' 萬';
+const hav=(a,b,c,d)=>{const r=x=>x*Math.PI/180,R=6371,dl=r(c-a),dn=r(d-b),h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const nearest=(lat,lng)=>{let best=null;for(const p of P){const d=hav(lat,lng,p.lat,p.lng);if(!best||d<best.d)best={p,d}}return best};
+['checked1','checked2','checked3'].forEach(i=>{$('#'+i).textContent=CHECKED});
+
+/* 評分模型 */
+function score(o){const p=o.p,st=p.step;
+const cert=Math.max(10,[20,35,55,65,75,90,95][st]-p.pen);
+const up=[95,88,75,70,62,45,35][st];
+const loc=o.inR?100:o.d<0.5?90:o.d<1?80:o.d<2?68:o.d<3?55:o.d<5?40:20;
+const zone=o.inR?90:({'都市計畫農業區':85,'一般農業區':60,'特定農業區':30,'山坡地保育區':35}[o.zone]??50);
+let liq=70;if(o.own==='持分')liq-=30;if(o.road>=6)liq+=15;else if(o.road==0)liq-=20;if(o.area>3000)liq-=10;liq=Math.max(5,Math.min(100,liq));
+const total=Math.round(cert*.25+up*.2+loc*.25+zone*.15+liq*.15);
+const g=total>=75?'A':total>=60?'B':total>=45?'C':'D';
+return {cert,up,loc,zone,liq,total,g}}
+const gradeTxt={A:'高潛力',B:'具潛力',C:'觀察',D:'保守'};
+function enrich(l){const n=nearest(+l.lat,+l.lng);const s=score({p:n.p,d:n.d,inR:+l.inR,zone:l.zone,own:l.own,road:+l.road,area:+l.area});return {...l,np:n.p,nd:n.d,sc:s}}
+const allListings=()=>[...DEMO,...MEMBER].map(enrich);
+
+/* 地圖 */
+const OUT=[[121.537,25.297],[121.75,25.15],[122.0,25.01],[121.84,24.86],[121.87,24.6],[121.8,24.45],[121.62,23.98],[121.52,23.6],[121.4,23.1],[121.15,22.75],[120.9,22.35],[120.85,21.9],[120.72,21.93],[120.58,22.37],[120.44,22.47],[120.27,22.6],[120.18,22.88],[120.15,23.0],[120.07,23.15],[120.15,23.38],[120.2,23.78],[120.3,23.93],[120.42,24.07],[120.5,24.27],[120.58,24.4],[120.63,24.5],[120.85,24.7],[120.92,24.85],[121.08,25.05],[121.18,25.08],[121.35,25.12],[121.41,25.18],[121.52,25.29]];
+const X=l=>(l-119.9)*91.5,Y=a=>(25.45-a)*100;
+const landPath='M'+OUT.map(([a,b])=>X(a).toFixed(1)+' '+Y(b).toFixed(1)).join('L')+'Z';
+const ridge='M'+[[121.55,24.9],[121.35,24.4],[121.1,23.9],[120.95,23.4],[120.8,22.9],[120.78,22.3]].map(([a,b])=>X(a)+' '+Y(b)).join('L');
+const ZOOMS={all:[0,0,200,370,'全台'],n:[90,8,95,80,'北北基桃竹宜'],c:[25,85,80,100,'苗中彰投'],y:[5,150,80,100,'雲嘉南'],s:[20,225,95,85,'高屏'],e:[95,90,100,200,'花東']};
+let countyF='';
+let zoom='all',stageF='',selP='chhsr';
+function mapSVG(z,interactive){const [vx,vy,vw,vh]=ZOOMS[z],r=vw*.018;
+let g='<g class="grid">';for(let i=0;i<=200;i+=10)g+=`<line x1="${i}" y1="0" x2="${i}" y2="370"/>`;for(let j=0;j<=370;j+=10)g+=`<line x1="0" y1="${j}" x2="200" y2="${j}"/>`;g+='</g>';
+let pins='';for(const p of P){const s=stageOf(p.step);if(stageF&&s!==stageF||countyF&&p.county!==countyF)continue;const x=X(p.lng),y=Y(p.lat),col=`var(--${s})`;
+pins+=`<g class="pin${p.id===selP&&interactive?' sel':''}" data-p="${p.id}" tabindex="${interactive?0:-1}" role="button" aria-label="${esc(p.name)}"><circle class="halo" cx="${x}" cy="${y}" r="${r*2}" fill="${col}"/><circle class="core" cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="#fff" stroke-width="${r*.3}"/><title>${esc(p.name)}</title></g>`}
+let lst='';if(interactive)for(const l of allListings()){const x=X(+l.lng),y=Y(+l.lat),s=r*.75;lst+=`<rect x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" transform="rotate(45 ${x} ${y})" fill="var(--rice)" stroke="var(--ink)" stroke-width="${s*.12}"><title>${esc(l.town)} ${num(l.area)} 坪</title></rect>`}
+let lab='';if(z!=='all'){for(const p of P){const s=stageOf(p.step);if(stageF&&s!==stageF||countyF&&p.county!==countyF)continue;lab+=`<text x="${X(p.lng)+r*1.6}" y="${Y(p.lat)+r*.5}" font-size="${vw*.028}" fill="var(--ink)" style="paint-order:stroke;stroke:var(--soft);stroke-width:${vw*.008}px">${esc(p.name.replace(/（.*?）/,'').slice(0,8))}</text>`}}
+return `<svg viewBox="${vx} ${vy} ${vw} ${vh}" role="img" aria-label="台灣開發案地圖"><rect x="-50" y="-50" width="300" height="470" fill="var(--soft)"/>${g}<path class="land" d="${landPath}"/><path class="ridge" d="${ridge}"/>${lst}${pins}${lab}</svg>`}
+function drawMaps(){$('#heroMap').innerHTML=mapSVG('all',false);$('#bigMap').innerHTML=mapSVG(zoom,true);
+$('#bigMap').querySelectorAll('.pin').forEach(el=>{const f=()=>{selP=el.dataset.p;drawMaps();renderProj()};el.addEventListener('click',f);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})});
+$('#heroMap').querySelectorAll('.pin').forEach(el=>el.addEventListener('click',()=>{selP=el.dataset.p;location.hash='map'}))}
+function renderChips(){const st=[['','全部'],['pre','開發前'],['mid','開發中'],['post','開發後']];
+$('#stageChips').innerHTML=st.map(([k,t])=>`<button class="chip${stageF===k?' on':''}" data-s="${k}">${t}（${k?P.filter(p=>stageOf(p.step)===k).length:P.length}）</button>`).join('');
+$('#zoomChips').innerHTML=Object.entries(ZOOMS).map(([k,v])=>`<button class="chip${zoom===k?' on':''}" data-z="${k}">${v[4]}</button>`).join('')}
+$('#stageChips').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;stageF=b.dataset.s;renderChips();drawMaps();renderProjList()});
+$('#mCounty').innerHTML+=[...new Set(P.map(p=>p.county))].map(c=>`<option>${c}</option>`).join('');
+$('#mCounty').addEventListener('change',e=>{countyF=e.target.value;const f=P.find(p=>p.county===countyF);if(f){selP=f.id;const r=Object.entries(ZOOMS).find(([k,v])=>k!=='all'&&X(f.lng)>=v[0]&&X(f.lng)<=v[0]+v[2]&&Y(f.lat)>=v[1]&&Y(f.lat)<=v[1]+v[3]);if(r)zoom=r[0]}renderChips();drawMaps();renderProj();renderProjList()});
+$('#zoomChips').addEventListener('click',e=>{const b=e.target.closest('[data-z]');if(!b)return;zoom=b.dataset.z;renderChips();drawMaps()});
+function renderProjList(){const PL=P.filter(p=>(!stageF||stageOf(p.step)===stageF)&&(!countyF||p.county===countyF));$('#projList').innerHTML=(PL.length?'':'<p class="muted">這個條件下沒有案件。</p>')+PL.map(p=>{const s=stageOf(p.step);return `<button class="pitem${p.id===selP?' sel':''}" data-p="${p.id}"><span class="tag t-${s}">${STAGE[s]}</span> <span class="small muted">${esc(p.county)}・${esc(p.town)}</span><br><b>${esc(p.name)}</b><br><span class="small muted">${esc(p.type)}・目前：${STEPS[p.step]}</span></button>`}).join('')}
+$('#projList').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;selP=b.dataset.p;drawMaps();renderProj();renderProjList();$('#projDetail').scrollIntoView({behavior:'smooth',block:'nearest'})});
+function renderProj(){const p=P.find(x=>x.id===selP)||P[0],s=stageOf(p.step);
+const near=allListings().filter(l=>l.np.id===p.id).sort((a,b)=>a.nd-b.nd);
+$('#projDetail').innerHTML=`<span class="tag t-${s}">${STAGE[s]}</span> <span class="small muted">${esc(p.type)}・${esc(p.county)}${esc(p.town)}</span>
+<h3 style="margin-top:8px;font-size:22px">${esc(p.name)}</h3><p class="muted small">規模：${esc(p.area)}</p>${p.type!=='區段徵收'?`<p class="note">本案屬「${esc(p.type)}」，非典型區段徵收，進度軌道為近似對照；地主能否領回抵價地依實際開發方式而定。</p>`:''}
+<div class="track">${STEPS.map((t,i)=>`<div class="${i<p.step?'done':i===p.step?'now':''}">${t}</div>`).join('')}</div>
+<ul class="facts">${p.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+${p.risk?`<div class="risk"><b>風險提示：</b>${esc(p.risk)}</div>`:''}
+<p class="small" style="margin-top:12px">來源：<a href="${esc(p.src)}">${esc(p.srcN)}</a>　查證 ${CHECKED}</p>
+<h3 style="margin-top:16px">相關新聞</h3><div id="newsBox">${newsHTML(p.id)}</div>
+<h3 style="margin-top:16px">周邊在售農地（${near.length}）</h3>
+${near.length?near.map(l=>`<p style="margin:6px 0"><a href="#item-${esc(l.id)}">${esc(l.town)} ${num(l.area)} 坪・${num(l.price,1)} 萬/坪</a> <span class="muted small">距離 ${num(l.nd,1)} km・潛力 ${l.sc.g}</span></p>`).join(''):'<p class="muted small">目前沒有物件。</p>'}
+<div class="chips" style="margin-top:12px"><button class="btn pri" id="toReport">用這個開發案試算潛力報告</button></div>`;
+$('#toReport').onclick=()=>{$('#rPick').value='';$('#rProj').value=p.id;location.hash='report';calcReport()}}
+
+/* 每月新聞 */
+let NEWS={};
+let newsAt='',newsState='loading';
+function newsHTML(id){if(newsState==='loading')return '<p class="note">新聞載入中…</p>';if(newsState==='error')return '<p class="note">新聞暫時無法載入。</p>';const n=NEWS[id];
+if(!n||!Array.isArray(n.items)||!n.items.length)return '<p class="note">目前尚無收錄報導，系統每月自動更新。</p>';
+return n.items.slice(0,6).map(it=>{const u=String(it&&it.url||''),ok=/^https:\/\//.test(u);return `<div class="news"><span class="small muted">${esc(it.date)}・${esc(it.source)}</span><br>${ok?`<a href="${esc(u)}">${esc(it.title)}</a>`:esc(it.title)}${it.summary?`<p class="small muted" style="margin:2px 0 0">${esc(it.summary)}</p>`:''}</div>`}).join('')+`<p class="note">更新於 ${esc(String(n.updatedAt||newsAt).slice(0,10))}・每月自動更新</p>`}
+fetch('news.json',{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{NEWS=(j&&typeof j.projects==='object'&&j.projects)||{};newsAt=String(j&&j.updatedAt||'');newsState='ok'}).catch(()=>{newsState='error'}).finally(()=>{const b=$('#newsBox');if(b)b.innerHTML=newsHTML(selP);renderDash()});
+/* 在售農地 */
+const counties=[...new Set([...P.map(p=>p.county),'臺中市','彰化縣','南投縣','嘉義縣','宜蘭縣','花蓮縣','苗栗縣','新竹市','基隆市','嘉義市'])];
+$('#fCounty').innerHTML+=counties.map(c=>`<option>${c}</option>`).join('');$('#pCounty').innerHTML=counties.map(c=>`<option>${c}</option>`).join('');
+['fStage','fCounty','fDist','fSort'].forEach(i=>$('#'+i).addEventListener('change',renderListings));
+const badge=l=>l.demo?'<span class="tag" style="background:var(--mute)">示範</span>':'<span class="tag" style="background:var(--rice);color:#1b2a12">會員刊登</span>';
+function renderListings(){let L=allListings();const st=$('#fStage').value,c=$('#fCounty').value,d=+$('#fDist').value,so=$('#fSort').value;
+L=L.filter(l=>(!st||stageOf(l.np.step)===st)&&(!c||l.county===c)&&(l.inR==1||l.nd<=d));
+L.sort((a,b)=>so==='dist'?a.nd-b.nd:so==='price'?a.price-b.price:b.sc.total-a.sc.total);
+$('#listTable tbody').innerHTML=L.length?L.map(l=>`<tr><td>${badge(l)}<br><b>${esc(l.county)}${esc(l.town)}</b><br><span class="small muted">${esc(l.sec)}・${esc(l.own)}</span></td><td>${esc(l.zone)}</td><td class="n">${num(l.area)} 坪</td><td class="n">${num(l.price,1)} 萬</td><td class="n">${money(l.area*l.price)}</td><td>${esc(l.np.name)}<br><span class="small muted">${+l.inR?'範圍內':'距 '+num(l.nd,1)+' km'}・${STAGE[stageOf(l.np.step)]}</span></td><td><b>${l.sc.g}</b> <span class="small muted">${l.sc.total}</span></td><td><a class="btn" href="#item-${esc(l.id)}">查看</a></td></tr>`).join(''):'<tr><td colspan="8" class="muted">沒有符合條件的物件，試著放寬距離或階段。</td></tr>';
+$('#homeListings').innerHTML=allListings().sort((a,b)=>b.sc.total-a.sc.total).slice(0,3).map(l=>`<a class="card" href="#item-${esc(l.id)}" style="text-decoration:none">${badge(l)} <span class="small muted">${esc(l.np.name)}</span><h3 style="margin-top:8px">${esc(l.county)}${esc(l.town)}・${num(l.area)} 坪</h3><p class="muted small">${esc(l.zone)}・開價 ${num(l.price,1)} 萬/坪・總價 ${money(l.area*l.price)}</p><p style="margin:0"><b style="font-size:24px">${l.sc.g}</b> 潛力 ${l.sc.total} 分・${gradeTxt[l.sc.g]}</p></a>`).join('');
+$('#rPick').innerHTML='<option value="">— 自行輸入 —</option>'+allListings().map(l=>`<option value="${esc(l.id)}">${l.demo?'［示範］':''}${esc(l.county)}${esc(l.town)} ${num(l.area)} 坪</option>`).join('')}
+
+/* 物件詳情 */
+function renderItem(id){const l=allListings().find(x=>x.id===id);const box=$('#itemBody');
+if(!l){box.innerHTML='<h2>找不到這筆物件</h2><p class="muted">可能已下架。</p><a class="btn" href="#listings">回到在售農地</a>';return}
+const s=stageOf(l.np.step),sc=l.sc,mine=!l.demo&&l.owner===uid;
+box.innerHTML=`<p><a href="#listings">← 回到在售農地</a></p>
+<div class="cols"><div class="card">${badge(l)} <span class="tag t-${s}">${STAGE[s]}</span>
+<h2 style="margin-top:10px">${esc(l.county)}${esc(l.town)}　${esc(l.sec)}</h2>
+<div class="kpi"><b>${money(l.area*l.price)}</b><span class="muted">開價總價，非成交價</span></div>
+<table style="margin-top:12px"><tbody>
+<tr><th>面積</th><td class="n">${num(l.area)} 坪（約 ${num(l.area*3.3058/10000,2)} 公頃）</td></tr>
+<tr><th>開價單價</th><td class="n">${num(l.price,1)} 萬元/坪</td></tr>
+<tr><th>使用分區</th><td class="n">${esc(l.zone)}</td></tr>
+<tr><th>產權</th><td class="n">${esc(l.own)}</td></tr>
+<tr><th>臨路</th><td class="n">${+l.road?esc(l.road)+' 米':'無臨路'}</td></tr>
+<tr><th>座標</th><td class="n">${num(l.lat,5)}, ${num(l.lng,5)}</td></tr>
+</tbody></table>
+<p>${esc(l.desc)}</p>
+${l.demo?'<p class="note">示範物件，數字僅供展示功能，並非真實委託。</p>':`<p class="note">由會員刊登，平台未審核。聯絡：${esc(l.contact)}</p>`}
+<div class="chips"><a class="btn" href="https://www.google.com/maps?q=${+l.lat},${+l.lng}">用 Google 地圖看位置</a><button class="btn pri" id="itemReport">產生潛力報告</button>${mine||(isOwner&&!l.demo)?'<button class="btn" id="itemDel">下架</button>':''}</div>
+</div>
+<div><div class="card"><div style="display:flex;gap:16px;align-items:center"><div class="grade">${sc.g}</div><div><b style="font-size:22px">潛力 ${sc.total} 分・${gradeTxt[sc.g]}</b><br><span class="muted small">最近開發案：${esc(l.np.name)}（${+l.inR?'範圍內':'距 '+num(l.nd,1)+' km'}）</span></div></div>
+<div class="bars" style="margin-top:16px">${bars(sc)}</div></div>
+<div class="card" style="margin-top:16px"><h3>對這塊地有興趣？</h3>${l.demo?'<p class="muted small">示範物件不接受詢問。</p>':`<form id="iqForm" class="form"><label class="full">您的稱呼<input id="iqName" required maxlength="20"></label><label class="full">聯絡方式<input id="iqContact" required maxlength="40"></label><label class="full">想問什麼<textarea id="iqMsg" maxlength="300"></textarea></label><div class="full"><button class="btn acc" type="submit">送出詢問</button> <span class="note" id="iqNote"></span></div></form>`}</div></div></div>`;
+$('#itemReport').onclick=()=>{$('#rPick').value=l.id;fillFromPick();location.hash='report'};
+const del=$('#itemDel');if(del)del.onclick=()=>removeListing(l);
+const iq=$('#iqForm');if(iq)iq.onsubmit=e=>{e.preventDefault();sendInquiry(l)}}
+function bars(sc){return [['開發確定性',sc.cert],['增值空間',sc.up],['區位距離',sc.loc],['變更可行性',sc.zone],['流動性',sc.liq]].map(([t,v])=>`<div class="brow"><span>${t}</span><div class="btrack"><div class="bfill" style="width:${v}%"></div></div><b>${v}</b></div>`).join('')}
+
+/* 潛力報告 */
+$('#rProj').innerHTML=P.map(p=>`<option value="${p.id}">${esc(p.county)}｜${esc(p.name)}（${STAGE[stageOf(p.step)]}）</option>`).join('');
+function fillFromPick(){const l=allListings().find(x=>x.id===$('#rPick').value);if(!l){calcReport();return}
+$('#rProj').value=l.np.id;$('#rDist').value=l.nd.toFixed(1);$('#rIn').value=+l.inR?'1':'0';$('#rZone').value=l.zone;$('#rOwn').value=l.own;$('#rArea').value=l.area;$('#rPrice').value=l.price;$('#rRoad').value=l.road;calcReport()}
+$('#rPick').addEventListener('change',fillFromPick);
+$('#rForm').addEventListener('input',e=>{if(e.target.id!=='rPick')calcReport()});
+let reportText='';
+function calcReport(){const p=P.find(x=>x.id===$('#rProj').value)||P[0],inR=$('#rIn').value==='1',d=Math.max(0,+$('#rDist').value||0),zone=$('#rZone').value,own=$('#rOwn').value,area=Math.max(1,+$('#rArea').value||1),price=Math.max(0,+$('#rPrice').value||0),road=+$('#rRoad').value||0,build=Math.max(0,+$('#rBuild').value||0),ratio=+$('#rRatio').value/100;
+$('#rRatioV').textContent=Math.round(ratio*100)+'%';
+const sc=score({p,d,inR,zone,own,road,area}),s=stageOf(p.step);
+const yrs=p.step<=1?8:p.step<=3?5:p.step===4?3:1.5,horizon=p.step<=1?'約 5–10 年':p.step<=3?'約 3–6 年':p.step===4?'約 2–4 年':'已進入市場';
+const cost=area*price,back=area*ratio,val=back*build,mult=cost?val/cost:0,cagr=mult>0?(Math.pow(mult,1/yrs)-1)*100:0;
+const why=[];
+if(p.step<=1)why.push('開發案仍在規劃審議，範圍與期程都可能改變；屬早期卡位，增值空間大但需要耐心。');
+else if(p.step<=4)why.push('開發案已公告或施工中，確定性提高，價格通常已反映部分利多。');
+else why.push('開發區已成熟，周邊農地主要看外溢效應與未來都市計畫擴大的機會。');
+if(!inR)why.push(d<1?'距開發案 1 公里內，最可能先受惠於道路、人口與公設外溢。':d<3?'位於 1–3 公里外溢圈，需留意聯外道路是否串接。':'距離超過 3 公里，外溢效果有限，應以農業使用或長期持有評估。');
+if(!inR&&zone==='特定農業區')why.push('特定農業區變更為建地難度最高，除非被劃入新計畫範圍。');
+if(!inR&&zone==='都市計畫農業區')why.push('都市計畫農業區在通盤檢討時較有機會變更為住宅或產業用地。');
+if(own==='持分')why.push('持分土地流動性低，融資與處分都較困難，宜評估是否能整合或分割。');
+if(road==0)why.push('無臨路土地需確認通行權，會影響建農舍與轉售。');
+if(p.risk)why.push('開發案風險：'+p.risk);
+const out=$('#rOut');
+out.innerHTML=`<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div class="grade">${sc.g}</div><div><p class="small muted" style="margin:0">潛力分析報告・${CHECKED}</p><b style="font-size:24px">${sc.total} 分・${gradeTxt[sc.g]}</b><br><span class="muted">${esc(p.name)}・<span class="tag t-${s}">${STAGE[s]}</span>・${inR?'範圍內':'距 '+num(d,1)+' km'}</span></div></div>
+<div class="bars" style="margin-top:18px">${bars(sc)}</div>
+<h3 style="margin-top:20px">${inR?'抵價地情境試算':'外溢情境'}</h3>
+${inR?`<table><tbody><tr><th>買進成本</th><td class="n">${money(cost)}</td></tr><tr><th>預估領回建地</th><td class="n">${num(back)} 坪（${Math.round(ratio*100)}%）</td></tr><tr><th>建地預估價值</th><td class="n">${money(val)}</td></tr><tr><th>價值倍數</th><td class="n"><b>${num(mult,2)} 倍</b></td></tr><tr><th>預估持有期</th><td class="n">${horizon}</td></tr><tr><th>粗估年化</th><td class="n">${num(cagr,1)}%</td></tr></tbody></table><p class="note">也可選領現金補償（按徵收當期市價）。抵價地實際依權利價值分配，可能需補繳差額地價。</p>`
+:`<p>範圍外的地不會領回抵價地，價值取決於周邊發展。以目前開價 <b>${money(cost)}</b> 計算，若未來可變更為建地並達到每坪 ${num(build,1)} 萬，需扣除變更回饋（常見 30%–40% 土地或代金），預估價值約 <b>${money(area*.65*build)}</b>（以回饋 35% 粗估）。</p>`}
+<h3 style="margin-top:18px">分析重點</h3><ul class="facts">${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
+<p class="note">本報告依公開資料與簡化模型產生，僅供初步評估，非投資建議。實際範圍、分區與價格請以地政機關謄本、都市計畫圖與實價登錄為準。</p>
+<div class="chips"><button class="btn pri" id="copyR">複製報告文字</button><span class="note" id="copyN"></span></div>`;
+reportText=`【農地發展潛力分析報告】${CHECKED}\n最近開發案：${p.name}（${STAGE[s]}，目前：${STEPS[p.step]}）\n位置：${inR?'開發範圍內':'距開發案約 '+d.toFixed(1)+' 公里'}｜${zone}｜${own}｜${area} 坪｜開價 ${price} 萬/坪\n綜合潛力：${sc.total} 分（${sc.g} ${gradeTxt[sc.g]}）\n開發確定性 ${sc.cert}・增值空間 ${sc.up}・區位距離 ${sc.loc}・變更可行性 ${sc.zone}・流動性 ${sc.liq}\n${inR?`抵價地試算：成本 ${money(cost)}，領回約 ${Math.round(back)} 坪，價值約 ${money(val)}，約 ${mult.toFixed(2)} 倍，持有期${horizon}`:'範圍外：以外溢效應評估'}\n分析重點：\n- ${why.join('\n- ')}\n※ 僅供初步評估，非投資建議。來源：${p.srcN}`;
+$('#copyR').onclick=async()=>{try{await navigator.clipboard.writeText(reportText);$('#copyN').textContent='已複製，可貼到 LINE 或文件。'}catch(e){$('#copyN').textContent='瀏覽器不允許複製，請手動選取文字。'}}}
+
+/* 價差試算 */
+function calc(){const a=+$('#cArea').value||0,b=+$('#cBuy').value||0,r=Math.min(50,Math.max(40,+$('#cRatio').value||45))/100,bp=+$('#cBuild').value||0,y=Math.max(1,+$('#cYears').value||1),h=+$('#cHold').value||0;
+const cost=a*b+h*y,val=a*r*bp,gain=val-cost,m=cost?val/cost:0,cg=m>0?(Math.pow(m,1/y)-1)*100:0,be=a*r?cost/(a*r):0;
+$('#cOut').innerHTML=`<p class="muted small" style="margin:0">預估淨價差</p><div class="kpi"><b style="color:${gain>=0?'var(--post)':'var(--acc)'}">${gain>=0?'+':''}${money(gain)}</b></div>
+<table style="margin-top:12px"><tbody><tr><th>總成本（買地＋持有）</th><td class="n">${money(cost)}</td></tr><tr><th>領回建地</th><td class="n">${num(a*r)} 坪</td></tr><tr><th>建地價值</th><td class="n">${money(val)}</td></tr><tr><th>倍數</th><td class="n">${num(m,2)} 倍</td></tr><tr><th>年化報酬</th><td class="n">${num(cg,1)}%</td></tr><tr><th>損益兩平建地單價</th><td class="n">${num(be,1)} 萬/坪</td></tr></tbody></table>
+<p class="note">建地單價可參考開發區標售底價或實價登錄，例如高鐵彰化特定區住宅區標售底價約每坪 12.6 萬（2026）。</p>`}
+document.querySelectorAll('#v-calc input').forEach(i=>i.addEventListener('input',calc));
+
+/* 流程與來源 */
+$('#flowSteps').innerHTML=STEPS.map((t,i)=>`<span><b>${i+1}</b>　${t}</span>`).join('');
+function renderStats(){const L=allListings();$('#homeStats').innerHTML=[[P.filter(p=>stageOf(p.step)==='pre').length,'開發前案件'],[P.filter(p=>stageOf(p.step)==='mid').length,'開發中案件'],[P.filter(p=>stageOf(p.step)==='post').length,'開發後案件'],[L.length,'筆在售農地']].map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('')}
+
+/* 資料庫：會員刊登與詢問 */
+function setPostState(t,warn){const b=$('#postState');b.textContent=t;b.style.background=warn?'light-dark(#fff1ec,#2a1710)':'';}
+function lockPost(on){document.querySelectorAll('#pForm input,#pForm select,#pForm textarea,#pForm button').forEach(x=>x.disabled=on)}
+lockPost(true);
+async function initDb(){try{if(!window.claude||!window.claude.use){setPostState('預覽模式：刊登與詢問功能需在 claude.ai 開啟此頁才能使用。',1);$('#dbNote').textContent='目前只顯示示範物件。';return}
+db=await window.claude.use('db');const user=await window.claude.use('user');
+if(!db||!user){setPostState('請先登入 claude.ai，才能刊登農地。',1);return}
+uid=await user.id();try{canW=user.can?await user.can('data.write'):null}catch(e){canW=null}try{isOwner=user.isOwner?!!(await user.isOwner()):false}catch(e){}
+if(!uid){setPostState('無法辨識您的身分，暫時不能刊登。',1);return}
+const t=setTimeout(()=>{$('#dbNote').textContent='會員刊登資料暫時連不上，先顯示示範物件。'},10000);
+db.collection('listings').onSnapshot(snap=>{clearTimeout(t);const arr=[];for(const d of snap.docs){const items=(d.data()||{}).items;if(Array.isArray(items))for(const it of items){if(it&&isFinite(+it.lat)&&isFinite(+it.lng)&&+it.area>0)arr.push({...it,owner:d.id,id:String(it.id||'')})}}
+MEMBER=arr;MINE=arr.filter(x=>x.owner===uid);$('#dbNote').textContent=`會員刊登 ${arr.length} 筆，即時更新。`;refresh()},err=>{clearTimeout(t);$('#dbNote').textContent='會員刊登資料無法讀取。'});
+if(canW===false){setPostState('您目前是檢視權限，無法刊登。請向平台管理者索取「Contributor」權限。',1);return}
+lockPost(false);setPostState('已連線。刊登後所有訪客都看得到，您可以隨時下架自己的物件。')}catch(e){setPostState('刊登資料庫暫時無法使用。',1)}}
+let busy=false;
+$('#pForm').addEventListener('submit',async e=>{e.preventDefault();if(!db||!uid||busy)return;
+const it={id:'m'+Date.now().toString(36),county:$('#pCounty').value,town:$('#pTown').value.trim(),sec:$('#pSec').value.trim()||'未提供地號',zone:$('#pZone').value,area:+$('#pArea').value,price:+$('#pPrice').value,own:$('#pOwn').value,road:+$('#pRoad').value||0,lat:+$('#pLat').value,lng:+$('#pLng').value,inR:+$('#pIn').value,contact:$('#pContact').value.trim(),desc:$('#pDesc').value.trim(),at:new Date().toISOString()};
+if(it.lat<21.8||it.lat>25.4||it.lng<119.9||it.lng>122.1){$('#pMsg').textContent='座標不在台灣範圍內，請確認緯度、經度沒有填反。';return}
+busy=true;$('#pMsg').textContent='送出中…';
+try{const items=[...MINE.map(({owner,...r})=>r),it];await db.doc('listings/'+uid).set({items});$('#pMsg').textContent='刊登完成！';$('#pForm').reset();location.hash='item-'+it.id}
+catch(err){$('#pMsg').textContent=err&&err.code==='invalid_argument'?'您沒有刊登權限，請向管理者索取 Contributor 權限。':err&&err.code==='quota_exceeded'?'資料庫已滿，請聯絡管理者。':'送出失敗，請稍後再試。'}busy=false});
+async function removeListing(l){if(!db||busy)return;busy=true;try{const rest=MEMBER.filter(x=>x.owner===l.owner&&x.id!==l.id).map(({owner,...r})=>r);await db.doc('listings/'+l.owner).set({items:rest});location.hash='listings'}catch(e){const n=$('#itemDel');if(n)n.textContent='下架失敗'}busy=false}
+async function sendInquiry(l){const note=$('#iqNote');if(!db||!uid){note.textContent='請在 claude.ai 登入後再送出。';return}if(busy)return;busy=true;note.textContent='送出中…';
+try{const ref=db.doc('inquiries/'+uid);const cur=await ref.get();const items=(cur.exists&&Array.isArray(cur.data().items))?[...cur.data().items]:[];items.push({listing:l.id,where:l.county+l.town,name:$('#iqName').value.trim(),contact:$('#iqContact').value.trim(),msg:$('#iqMsg').value.trim(),at:new Date().toISOString()});await ref.set({items:items.slice(-50)});note.textContent='已送出，平台會轉交刊登者。';$('#iqForm').reset()}
+catch(e){note.textContent='送出失敗，可能沒有權限。'}busy=false}
+function renderMine(){$('#myListings').innerHTML=MINE.length?`<h3>我的刊登（${MINE.length}）</h3>`+MINE.map(l=>`<p><a href="#item-${esc(l.id)}">${esc(l.county)}${esc(l.town)} ${num(l.area)} 坪・${num(l.price,1)} 萬/坪</a></p>`).join(''):''}
+
+
+/* 市場動態儀表板 */
+const REG={'北部':['臺北市','新北市','基隆市','桃園市','新竹縣','新竹市','宜蘭縣'],'中部':['苗栗縣','臺中市','彰化縣','南投縣','雲林縣'],'南部':['嘉義縣','嘉義市','臺南市','高雄市','屏東縣'],'東部':['花蓮縣','臺東縣']};
+const regionOf=c=>Object.keys(REG).find(r=>REG[r].includes(c))||'其他';
+let dReg='';
+const dKey=d=>{const m=String(d||'').match(/^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/);return m?m[1]+'-'+(m[2]||'00').padStart(2,'0')+'-'+(m[3]||'00').padStart(2,'0'):''};
+const latestOf=id=>{const n=NEWS[id];if(!n||!Array.isArray(n.items))return null;return [...n.items].filter(x=>x&&x.title).sort((a,b)=>dKey(b.date)<dKey(a.date)?-1:1)[0]||null};
+const isRecent=it=>{if(!it)return false;const k=dKey(it.date);if(!k)return false;const t=new Date(newsAt||CHECKED);t.setDate(t.getDate()-45);return k>=t.toISOString().slice(0,10)};
+const newsLink=it=>{const u=String(it.url||'');return /^https:\/\//.test(u)?`<a href="${esc(u)}">${esc(it.title)}</a>`:`<b>${esc(it.title)}</b>`};
+function initDash(){
+$('#dRegion').innerHTML=['','北部','中部','南部','東部'].map(r=>`<button class="chip${dReg===r?' on':''}" data-r="${r}">${r||'全台'}（${P.filter(p=>!r||regionOf(p.county)===r).length}）</button>`).join('');
+const cs=[...new Set(P.filter(p=>!dReg||regionOf(p.county)===dReg).map(p=>p.county))],cur=$('#dCounty').value;
+$('#dCounty').innerHTML='<option value="">全部縣市</option>'+cs.map(c=>`<option${c===cur?' selected':''}>${c}</option>`).join('');
+if(!$('#dType').dataset.done){$('#dType').innerHTML+=[...new Set(P.map(p=>p.type))].map(t=>`<option>${t}</option>`).join('');$('#dType').dataset.done=1}}
+function renderDash(){
+$('#dashAt').textContent=newsAt?newsAt.slice(0,10):(newsState==='loading'?'載入中':'—');
+const q=$('#dQ').value.trim(),c=$('#dCounty').value,st=$('#dStage').value,ty=$('#dType').value,so=$('#dSort').value;
+let L=P.filter(p=>(!dReg||regionOf(p.county)===dReg)&&(!c||p.county===c)&&(!st||stageOf(p.step)===st)&&(!ty||p.type===ty)&&(!q||(p.name+p.county+p.town+p.type).includes(q)));
+L=L.map(p=>({p,n:latestOf(p.id)}));
+L.sort((a,b)=>so==='stage'?a.p.step-b.p.step:so==='county'?a.p.county.localeCompare(b.p.county,'zh-Hant'):dKey(b.n&&b.n.date).localeCompare(dKey(a.n&&a.n.date)));
+const cnt=k=>L.filter(x=>stageOf(x.p.step)===k).length,rec=L.filter(x=>isRecent(x.n)).length;
+$('#dKpi').innerHTML=[[L.length,'符合條件的開發案'],[cnt('pre'),'開發前（規劃・審議）'],[cnt('mid'),'開發中（公告・工程）'],[cnt('post'),'開發後（配地・成熟）'],[rec,'近 45 天有新報導']].map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('');
+$('#dBars').innerHTML=Object.keys(REG).map(r=>{const R=P.filter(p=>regionOf(p.county)===r&&(!st||stageOf(p.step)===st)&&(!ty||p.type===ty)),t=R.length||1,f=k=>R.filter(p=>stageOf(p.step)===k).length;
+return `<div class="brow" style="grid-template-columns:4em minmax(0,1fr) 5.5em"><span>${r}</span><div class="stackbar" title="開發前 ${f('pre')}、開發中 ${f('mid')}、開發後 ${f('post')}"><i style="width:${f('pre')/t*100}%;background:var(--pre)"></i><i style="width:${f('mid')/t*100}%;background:var(--mid)"></i><i style="width:${f('post')/t*100}%;background:var(--post)"></i></div><span class="small muted">${f('pre')}／${f('mid')}／${f('post')}</span></div>`}).join('');
+const feed=[];for(const x of L){const n=NEWS[x.p.id];if(n&&Array.isArray(n.items))for(const it of n.items)if(it&&it.title)feed.push({p:x.p,it})}
+feed.sort((a,b)=>dKey(b.it.date).localeCompare(dKey(a.it.date)));
+$('#dFeed').innerHTML=newsState==='loading'?'<p class="note">新聞載入中…</p>':feed.length?feed.slice(0,7).map(({p,it})=>`<div class="feed"><span class="small muted">${esc(it.date)}・${esc(it.source)}・${esc(p.county)}</span>${isRecent(it)?'<span class="newtag">新</span>':''}<br>${newsLink(it)}<br><span class="small muted">${esc(p.name)}</span></div>`).join(''):'<p class="note">這個條件下還沒有報導。</p>';
+$('#dTable tbody').innerHTML=L.length?L.map(({p,n})=>{const s=stageOf(p.step);return `<tr><td><b>${esc(p.name)}</b><br><span class="small muted">${regionOf(p.county)}・${esc(p.county)}${esc(p.town)}・${esc(p.type)}</span></td><td><span class="tag t-${s}">${STAGE[s]}</span><br><span class="small muted">${STEPS[p.step]}</span></td><td>${n?`<span class="small muted">${esc(n.date)}・${esc(n.source)}</span>${isRecent(n)?'<span class="newtag">新</span>':''}<br>${newsLink(n)}`:'<span class="muted small">尚無報導</span>'}</td><td><a href="${esc(p.src)}">${esc(p.srcN)}</a></td><td><button class="btn" data-go="${p.id}">看進度</button></td></tr>`}).join(''):'<tr><td colspan="5" class="muted">沒有符合條件的開發案。</td></tr>';
+$('#dCount').textContent=`共 ${L.length} 案。點「看進度」開啟地圖上的七步驟進度與全部報導。`}
+$('#dRegion').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;dReg=b.dataset.r;$('#dCounty').value='';initDash();renderDash()});
+['dCounty','dStage','dType','dSort'].forEach(i=>$('#'+i).addEventListener('change',renderDash));
+$('#dQ').addEventListener('input',renderDash);
+$('#dTable').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;selP=b.dataset.go;stageF='';countyF='';const m=$('#mCounty');if(m)m.value='';zoom='all';renderChips();drawMaps();location.hash='map'});
+
+
+/* 風險評估與佈局矩陣 */
+const RISKS=[
+['開發確定性','計畫會不會真的做？',['是否已通過都委會、內政部土徵小組（公益性與必要性）','環評是否通過、有無被退回或要求補正','地主同意比例（市府多以回收 6 成、同意 7 成為門檻）','是否有行政訴訟或自救會抗爭'],'二林精機園區環評 12 年仍「補正後再審」；台中大里夏田地主同意約 56%，未達門檻。'],
+['期程與資金','要等多久、撐不撐得住？',['從都市計畫擬定到配地，常見 8–15 年','計算資金成本：利息或機會成本 × 年數','避免用短期貸款買長期題材','預留期程延宕 3–5 年的緩衝'],'桃園航空城拆遷期限一路從 2024 年延到 2026 年底。'],
+['範圍與分配','地在範圍內還是外？能配回什麼？',['以都市計畫圖套繪地籍，確認是否在範圍線內','範圍內：抵價地 40–50%，配地位置抽籤，可能要補差額地價','範圍外：無徵收風險，但要確認外溢路網會不會接過來','留意是否被劃為公設、滯洪池或斷層帶'],'高雄大社案把旗山斷層錯動帶規劃為綠帶與道路，範圍內地主配地會受影響。'],
+['產權與法規','這塊地能不能順利交易、變更？',['謄本：單獨所有或持分、有無抵押、限制登記','使用分區：特定農業區最難變更','國土功能分區（農 1～農 5、城 2-3）劃設結果','現況違規（鐵皮、填土）會讓農業使用證明申請不過'],'持分農地流動性與貸款條件都明顯較差。'],
+['價格與基期','利多是不是已經漲完了？',['比較周邊農地實價與未來建地行情的差距','留意選址公布後的急漲（容易追在高點）','參考已開發區的標售底價與流標情況','用「價差試算」算出損益兩平的建地單價'],'宜蘭高鐵特定區農地選址後從每坪約 2 萬喊到 7–10 萬；彰化高鐵特區產專區底價 14.2 萬後連續流標。'],
+['流動性與融資','想賣時賣不賣得掉？',['農地貸款成數較低，買方資金門檻高','大面積總價高，買方族群少','無臨路、畸零地轉手困難','先想好接手的人是誰：建商、工廠、自住農舍或投資客'],'大面積、總價上億的土地，買方多半只剩開發商或法人。']];
+$('#riskCards').innerHTML=RISKS.map(([t,q,list,ex],i)=>`<div class="card risk-card"><h3>${i+1}. ${t}</h3><p class="muted" style="margin:0">${q}</p><ul>${list.map(x=>`<li>${x}</li>`).join('')}</ul><div class="ex"><b>案例：</b>${ex}</div></div>`).join('');
+const POT={tyaero:[5,4,'國家級機場與捷運建設；北部地價高，徵收已進行多年'],tamsui:[4,3,'科技城定位、串聯北士科與內科；仍在環評'],fengjiang:[4,5,'交流道匝道與輕軌；雙北地價高'],puqian:[3,5,'都市縫合小型案；板橋中和地價高'],bitan:[2,5,'規模小、無產業題材；新店地價高'],shulin:[4,4,'新北大巨蛋；新北外圍地價中高'],ankeng:[3,4,'輕軌沿線；資料較舊'],shezi:[3,4,'台北市內大型案，抗爭多'],beishike:[5,5,'輝達總部；已是台北精華區'],taizhi:[5,4,'鄰高鐵新竹站與竹科；竹北房價 8 字頭外溢'],hsp3:[5,3,'竹科擴張；竹東價格低於竹北'],mlhsr:[4,1,'高鐵通勤新竹、台中；站區房價仍 3 字頭'],ylhsr:[4,4,'高鐵延伸宜蘭；農地選址後已漲數倍'],jiude:[4,4,'三鐵共構；烏日房價 5 字頭'],qianzhu:[3,4,'烏日高鐵生活圈；訴訟中'],xiatian:[3,3,'未登記工廠輔導；地主同意度低'],tucheng:[3,3,'產業型都計；同意度待提升'],xinan:[3,3,'產業型特定區；地主意願低'],shengang:[3,3,'產業園區；地主意願低'],tanzi:[3,4,'已完工招商，價格已反映'],chhsr:[3,2,'高鐵站區；住宅實價回落到 13–15 萬、樂齡園區流標'],ylic:[3,2,'台 76 員林交流道、929 公頃；南彰化價格帶低'],chic:[3,2,'彰化第 2 交流道 2035 年完工；農業區轉型待定'],shuiwujin:[3,2,'國家重大建設、785 公頃；審議接近完成'],chcity:[3,2,'台化廠區再發展；分期長'],erlin:[3,1,'鄰中科二林；環評卡關'],zhongxing:[2,2,'文化景觀限制，非變更題材'],mailiao:[3,1,'六輕產業核心；人口少、價格低'],huwei:[4,2,'中科虎尾與高鐵；公告地價漲幅全縣最高'],huwei2:[4,1,'中科虎尾核配率 98%、擴區需求；中長期'],cyseat:[5,2,'台積電先進封裝、嘉科、Outlet；嘉義價格帶低'],machouhou:[4,2,'半導體供應鏈衛星園區；後期已售罄'],jiabei:[3,2,'鐵路高架與嘉基醫療；嘉義市價格帶低'],cyind:[3,2,'嘉義市產業專區；推動逾 20 年'],nanke:[5,3,'南科擴張、約 4 萬移入人口；已公告徵收'],tntech:[4,3,'台南市區科技專區'],shalun:[4,3,'綠能科學城、成大沙崙院區；房價 4 字頭'],qiaotou:[5,3,'橋科、半導體 S 廊帶；已開發完成'],ns3:[5,2,'緊鄰橋科的下一期新市鎮'],dashe:[4,2,'S 廊帶居住腹地、7 成地主同意'],nuk:[3,4,'住三標售底價每坪 55 萬'],k205:[3,4,'高雄市區大型區徵'],pthsr:[5,2,'台積電供應鏈專區、高鐵延伸 2039；屏東價格帶低'],hualien:[2,2,'國土計畫指認，尚無都計'],taitung:[2,1,'多次流標後啟動建設']};
+const potOf=p=>{const [d,x,w]=POT[p.id]||[3,3,''];const dev=Math.max(0,Math.min(100,Math.round(d*16+[0,3,6,8,10,12,14][p.step]-p.pen*.8)));const base=Math.max(0,Math.min(100,Math.round(x*18+[0,2,4,6,8,10,12][p.step])));return {dev,base,pri:Math.round(dev*.6+(100-base)*.4),why:w}};
+let mxReg='';
+function mxData(){return P.filter(p=>!mxReg||regionOf(p.county)===mxReg).map(p=>({p,...potOf(p)}))}
+function renderMx(){
+$('#mxRegion').innerHTML=['','北部','中部','南部','東部'].map(r=>`<button class="chip${mxReg===r?' on':''}" data-r="${r}">${r||'全台'}</button>`).join('');
+const D=mxData().sort((a,b)=>b.pri-a.pri);
+$('#mxRank').innerHTML=D.slice(0,10).map((d,i)=>{const s=stageOf(d.p.step),top=d.dev>=60&&d.base<=50;return `<div class="rk"><b class="n">${i+1}</b><div><b>${esc(d.p.name)}</b>${top?'<span class="newtag">優先</span>':''}<br><span class="small muted">${esc(d.p.county)}・<span style="color:var(--${s})">${STAGE[s]}</span>・${esc(d.why)}</span></div><span class="sc">${d.pri}</span></div>`}).join('');
+$('#mxTable tbody').innerHTML=D.map(d=>`<tr><td><b>${esc(d.p.name)}</b><br><span class="small muted">${esc(d.p.county)}</span></td><td class="n">${d.dev}</td><td class="n">${d.base}</td><td>${esc(d.why)}</td></tr>`).join('');
+drawMx()}
+function drawMx(){const s=$('#mxSvg');if(!s)return;const W=s.clientWidth||600,H=s.clientHeight||420,m={l:44,r:14,t:14,b:40},iw=W-m.l-m.r,ih=H-m.t-m.b;
+const x=v=>m.l+v/100*iw,y=v=>m.t+(1-v/100)*ih,D=mxData(),small=W<520;
+let g=`<rect x="${x(0)}" y="${y(100)}" width="${x(50)-x(0)}" height="${y(60)-y(100)}" fill="var(--post)" opacity=".12"/>`;
+g+=`<line x1="${x(50)}" y1="${y(0)}" x2="${x(50)}" y2="${y(100)}" stroke="var(--line)" stroke-dasharray="4 4"/><line x1="${x(0)}" y1="${y(60)}" x2="${x(100)}" y2="${y(60)}" stroke="var(--line)" stroke-dasharray="4 4"/>`;
+g+=`<rect x="${x(0)}" y="${y(100)}" width="${iw}" height="${ih}" fill="none" stroke="var(--line)"/>`;
+g+=`<text class="mxq" x="${x(2)}" y="${y(96)}" font-weight="700" fill="var(--post)">優先長期佈局</text><text class="mxq" x="${x(98)}" y="${y(96)}" text-anchor="end">強動能・價格已反映</text><text class="mxq" x="${x(2)}" y="${y(3)}">低價但動能弱</text><text class="mxq" x="${x(98)}" y="${y(3)}" text-anchor="end">避開</text>`;
+g+=`<text class="mxq" x="${x(50)}" y="${H-8}" text-anchor="middle">價格基期 →（低 → 高）</text><text class="mxq" transform="translate(14 ${y(50)}) rotate(-90)" text-anchor="middle">發展性 →</text>`;
+const top=new Set(D.slice().sort((a,b)=>b.pri-a.pri).slice(0,small?4:7).map(d=>d.p.id));
+for(const d of D){const s=stageOf(d.p.step),jx=(d.p.id.charCodeAt(0)%7-3)*.6,jy=(d.p.id.charCodeAt(1)%7-3)*.6,cx=x(d.base+jx),cy=y(d.dev+jy);
+g+=`<circle cx="${cx}" cy="${cy}" r="${small?5:7}" fill="var(--${s})" stroke="var(--card)" stroke-width="1.5"><title>${esc(d.p.name)}｜發展性 ${d.dev}・基期 ${d.base}</title></circle>`;
+if(top.has(d.p.id))g+=`<text x="${cx+9}" y="${cy+4}" font-size="12" fill="var(--ink)" style="paint-order:stroke;stroke:var(--card);stroke-width:3px">${esc(d.p.name.replace(/（.*?）/g,'').slice(0,small?5:7))}</text>`}
+s.innerHTML=g}
+$('#mxRegion').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b)return;mxReg=b.dataset.r;renderMx()});
+try{const mxRO=new ResizeObserver(()=>drawMx());mxRO.observe($('#mxFig'))}catch(e){}
+
+/* 路由 */
+const VIEWS=['home','map','listings','report','post','compare','calc','tax','dash','sources'];
+function route(){const h=(location.hash||'#home').slice(1);let v=VIEWS.includes(h)?h:'home';
+document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+if(h.startsWith('item-')){$('#v-item').classList.add('on');renderItem(h.slice(5));v='listings'}
+else if(v==='dash'||v==='sources'){['v-home','v-dash','v-home2'].forEach(x=>$('#'+x).classList.add('on'));v='dash'}
+else{$('#v-'+v).classList.add('on');if(v==='home'){$('#v-dash').classList.add('on');$('#v-home2').classList.add('on')}}
+document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+v));
+if(v==='map'){renderProj();renderProjList()}if(v==='compare')drawMx();if(v==='dash'){const d=$('#v-dash');d.scrollIntoView?d.scrollIntoView():0}else window.scrollTo(0,0)}
+function refresh(){renderStats();renderListings();drawMaps();renderMine();const h=location.hash.slice(1);if(h==='map')renderProj();if(h.startsWith('item-'))renderItem(h.slice(5))}
+window.addEventListener('hashchange',route);
+renderChips();initDash();renderDash();renderMx();refresh();calc();calcReport();route();initDb();
+}
+</script>
+</body>
+</html>
