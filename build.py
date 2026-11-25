@@ -15,12 +15,20 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 D = lambda *p: os.path.join(ROOT, *p)
 OUT = D('dist')
 
+if os.environ.get('CF_PAGES') or os.environ.get('FETCH_AMENITIES'):
+    import subprocess, sys
+    try:
+        subprocess.run([sys.executable, D('fetch_amenities.py')], timeout=560)
+    except Exception as ex:
+        print('周邊機能抓取略過：', ex)
 CFG = json.load(open(D('data/site.json'), encoding='utf-8'))
 P = json.load(open(D('data/projects.json'), encoding='utf-8'))
 NEWS_ALL = json.load(open(D('data/news.json'), encoding='utf-8'))
 NEWS = NEWS_ALL.get('projects', {})
 NEWS_AT = NEWS_ALL.get('updatedAt', '')
 LIST = json.load(open(D('data/listings.json'), encoding='utf-8'))
+AMEN = json.load(open(D('data/amenities.json'), encoding='utf-8')) if os.path.exists(D('data/amenities.json')) else {}
+ACAT = [('交通', '#2f6db0'), ('學校', '#7a4bb3'), ('醫療', '#d4502a'), ('購物', '#c9a227'), ('公共服務', '#2f8a57'), ('公園綠地', '#5a9e3a')]
 SITE = CFG['site'].rstrip('/')
 BRAND = CFG['brand']
 TODAY = datetime.date.today().isoformat()
@@ -511,6 +519,16 @@ for p in P:
     pt = pot(p)
     n = news_of(p['id'])
     pr, pr_ok = plan_radius(p)
+    am = AMEN.get(p['id']) or {}
+    amen_pts = [[x['c'], x['n'], x['lat'], x['lng'], x['d']] for x in am.get('items', [])]
+    if am.get('items'):
+        amen_html = f'<p class="small muted" style="margin:0 0 8px">計畫中心周邊 {am["radius"] / 1000:.1f} 公里內的生活機能（OpenStreetMap，{e(am.get("updated", ""))} 更新）</p>'
+        for cname, ccol in ACAT:
+            xs = [x for x in am['items'] if x['c'] == cname]
+            top3 = '、'.join(f'{e(x["n"])} {x["d"] / 1000:.1f} 公里' for x in xs[:3]) or '範圍內未標示'
+            amen_html += f'<div class="fn"><span class="dot" style="background:{ccol}"></span><b>{cname}</b> <span class="muted small">{len(xs)}{"+" if len(xs) >= 25 else ""} 處</span><br><span class="small">{top3}</span></div>'
+    else:
+        amen_html = '<p class="note">周邊機能資料整理中，可先切換地圖底圖查看周邊環境。</p>'
     near = sorted(((l, hav(p['lat'], p['lng'], float(l['lat']), float(l['lng']))) for l in LIST if l.get('lat') and l.get('lng')), key=lambda t: t[1])
     near = [t for t in near if t[1] <= 5][:6]
     same = [q for q in P if q['county'] == p['county'] and q['id'] != p['id']]
@@ -542,8 +560,8 @@ for p in P:
 <section class="band" style="background:var(--soft)"><div class="wrap">
 <h2>{e(p['name'])}計畫範圍與周邊環境機能地圖</h2>
 <p class="muted">{e(p['name'])}位於{e(p['county'])}{e(p['town'])}。{'地圖上的橘色虛線圈是依計畫面積（' + e(p['area']) + '）推估的示意範圍' if pr_ok else '本案計畫面積尚未公開，橘色虛線圈以半徑 800 公尺示意'}，實際範圍請以都市計畫圖為準。右上角可切換街道地圖、臺灣通用電子地圖與空照圖，彩色圓點為周邊交通、學校、醫療、購物等生活機能。</p>
-<div class="cols" style="margin-top:14px"><div id="pmap" data-lat="{p['lat']}" data-lng="{p['lng']}" data-r="{pr}" data-name="{e(p['name'])}" role="region" aria-label="{e(p['name'])}範圍與周邊地圖"></div>
-<div class="card"><h3>周邊生活機能</h3><div id="pmapList"><p class="note">周邊機能載入中…</p></div>
+<div class="cols" style="margin-top:14px"><div id="pmap" data-lat="{p['lat']}" data-lng="{p['lng']}" data-r="{pr}" data-name="{e(p['name'])}" data-amen="{e(json.dumps(amen_pts, ensure_ascii=False, separators=(',', ':')))}" role="region" aria-label="{e(p['name'])}範圍與周邊地圖"></div>
+<div class="card"><h3>周邊生活機能</h3><div id="pmapList">{amen_html}</div>
 <h3 style="margin-top:16px">查詢正式計畫範圍</h3><ul class="facts small">
 <li><a href="https://luz.tcd.gov.tw/web/" target="_blank" rel="noopener">全國土地使用分區資料查詢系統</a>：可套疊地籍圖、都市計畫使用分區圖與非都市土地使用分區</li>
 <li><a href="https://nsp.tcd.gov.tw/tcdgis/" target="_blank" rel="noopener">國土規劃地理資訊圖台</a>：國土計畫功能分區與環境敏感地區</li>
