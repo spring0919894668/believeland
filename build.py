@@ -18,7 +18,7 @@ OUT = D('dist')
 if os.environ.get('CF_PAGES') or os.environ.get('FETCH_AMENITIES'):
     import subprocess, sys
     try:
-        subprocess.run([sys.executable, D('fetch_amenities.py')], timeout=560)
+        subprocess.run([sys.executable, D('fetch_amenities.py')], timeout=330)
     except Exception as ex:
         print('周邊機能抓取略過：', ex)
 CFG = json.load(open(D('data/site.json'), encoding='utf-8'))
@@ -395,7 +395,7 @@ def chart_scatter(projects, title, caption, highlight=None, label_n=8, w=520, h=
 
 LEAF = ('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">\n'
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>\n'
-        '<script src="/assets/pmap.js" defer></script>\n')
+        '<script src="/assets/pmap.js?v=' + __import__('hashlib').md5(open(D('src/pmap.js'), 'rb').read()).hexdigest()[:8] + '" defer></script>\n')
 
 # ---------- 開始輸出 ----------
 if os.path.exists(OUT): shutil.rmtree(OUT)
@@ -404,7 +404,7 @@ open(D('dist/assets/site.css'), 'w', encoding='utf-8').write(BASE_CSS + EXTRA_CS
 shutil.copy(D('src/pmap.js'), D('dist/assets/pmap.js'))
 open(D('dist/assets/favicon.svg'), 'w', encoding='utf-8').write(FAVICON)
 os.makedirs(D('dist/data'))
-for f in ('news.json', 'listings.json', 'projects.json'):
+for f in ('news.json', 'listings.json', 'projects.json') + (('amenities.json',) if AMEN else ()):
     shutil.copy(D('data', f), D('dist/data', f))
 
 counts = {k: sum(1 for p in P if stage_of(p['step']) == k) for k in STAGE}
@@ -528,7 +528,7 @@ for p in P:
             top3 = '、'.join(f'{e(x["n"])} {x["d"] / 1000:.1f} 公里' for x in xs[:3]) or '範圍內未標示'
             amen_html += f'<div class="fn"><span class="dot" style="background:{ccol}"></span><b>{cname}</b> <span class="muted small">{len(xs)}{"+" if len(xs) >= 25 else ""} 處</span><br><span class="small">{top3}</span></div>'
     else:
-        amen_html = '<p class="note">周邊機能資料整理中，可先切換地圖底圖查看周邊環境。</p>'
+        amen_html = '<p class="note">周邊機能清單逐步建置中；上方地圖預設為臺灣通用電子地圖，已標示學校、車站、醫院與公所等設施。</p>'
     near = sorted(((l, hav(p['lat'], p['lng'], float(l['lat']), float(l['lng']))) for l in LIST if l.get('lat') and l.get('lng')), key=lambda t: t[1])
     near = [t for t in near if t[1] <= 5][:6]
     same = [q for q in P if q['county'] == p['county'] and q['id'] != p['id']]

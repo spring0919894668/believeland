@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """建置時抓取各開發案周邊生活機能（OpenStreetMap / Overpass API），寫入 data/amenities.json。
-任何一案失敗都保留舊資料，不會讓建置失敗。總時間上限約 8 分鐘。
+任何一案失敗都保留舊資料，不會讓建置失敗。總時間上限約 5 分鐘。
+資料會發佈到網站 /data/amenities.json；下次建置先從線上取回，只補抓缺的或超過 30 天的案子，逐次累積。
 """
 import json, math, os, re, time, urllib.parse, urllib.request
 
@@ -8,9 +9,17 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'data', 'amenities.json')
 P = json.load(open(os.path.join(ROOT, 'data', 'projects.json'), encoding='utf-8'))
 old = json.load(open(OUT, encoding='utf-8')) if os.path.exists(OUT) else {}
+try:
+    with urllib.request.urlopen(urllib.request.Request(LIVE, headers={'User-Agent': 'believeland.tw build'}), timeout=20) as r:
+        for k, v in json.loads(r.read().decode('utf-8')).items():
+            if k not in old or v.get('updated', '') > old[k].get('updated', ''): old[k] = v
+    print('已取回線上周邊機能', len(old), '案')
+except Exception as ex:
+    print('線上周邊機能取回略過', type(ex).__name__)
 EPS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
        'https://maps.mail.ru/osm/tools/overpass/api/interpreter']
-START, LIMIT = time.time(), 480
+START, LIMIT = time.time(), 270
+LIVE = 'https://believeland-tw.pages.dev/data/amenities.json'
 
 
 def radius(p):
@@ -37,32 +46,36 @@ def cat(t):
 
 def query(lat, lng, R):
     a = f'(around:{R},{lat},{lng})'
-    return ('[out:json][timeout:60];('
+    return ('[out:json][timeout:25];('
             f'node["railway"="station"]{a};node["public_transport"="station"]{a};node["highway"="motorway_junction"]{a};'
             f'nwr["amenity"~"^(school|university|college|kindergarten|hospital|clinic|marketplace|townhall|police|fire_station|post_office|library|bus_station)$"]{a};'
-            f'nwr["shop"~"^(supermarket|mall|department_store)$"]{a};way["leisure"="park"]{a};);out center 500;')
+            f'nwr["shop"~"^(supermarket|mall|department_store)$"]{a};way["leisure"="park"]{a};);out center 400;')
 
 
 def fetch(q):
     body = urllib.parse.urlencode({'data': q}).encode()
     for ep in EPS:
-        for _ in range(2):
+        for _ in range(1):
+            if time.time() - START > LIMIT: return None
             try:
                 req = urllib.request.Request(ep, data=body, headers={'User-Agent': 'believeland.tw build (amenities)'})
-                with urllib.request.urlopen(req, timeout=70) as r:
+                with urllib.request.urlopen(req, timeout=35) as r:
                     return json.loads(r.read().decode('utf-8'))
             except Exception as ex:
                 print('  ', ep.split('/')[2], type(ex).__name__, str(ex)[:80])
-                time.sleep(6)
+                time.sleep(3)
     return None
 
 
 res = dict(old)
 ok = 0
-for p in P:
+fresh = time.strftime('%Y-%m-%d', time.localtime(time.time() - 30 * 86400))
+todo = sorted((p for p in P if res.get(p['id'], {}).get('updated', '') < fresh), key=lambda p: res.get(p['id'], {}).get('updated', ''))
+print('需更新', len(todo), '案')
+for p in todo:
     if time.time() - START > LIMIT:
         print('時間上限，其餘沿用舊資料'); break
-    R = radius(p) + 2000
+    R = min(radius(p) + 1500, 3500)
     j = fetch(query(p['lat'], p['lng'], R))
     if not j:
         print('失敗', p['id']); continue
@@ -87,6 +100,7 @@ for p in P:
     res[p['id']] = {'updated': time.strftime('%Y-%m-%d'), 'radius': R, 'items': [x for v in by.values() for x in v]}
     ok += 1
     print('ok', p['id'], len(res[p['id']]['items']))
+    json.dump(res, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     time.sleep(2)
 
 json.dump(res, open(OUT, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
