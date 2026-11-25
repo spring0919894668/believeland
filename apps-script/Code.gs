@@ -22,7 +22,7 @@ function doPost(e) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
     if (sh.getLastRow() === 0) { sh.appendRow(HEADERS); sh.setFrozenRows(1); }
-    sh.appendRow([new Date()].concat(FIELDS.map(f => clean_(p[f]))).concat(['未處理']));
+    sh.appendRow([new Date()].concat(FIELDS.map(f => keepText_(f, clean_(p[f])))).concat(['未處理']));
 
     if (NOTIFY_EMAIL) {
       MailApp.sendEmail(NOTIFY_EMAIL,
@@ -36,6 +36,11 @@ function doPost(e) {
 }
 
 // 截斷長度，並避免以 = + - @ 開頭的內容被試算表當成公式執行
+// 電話、LINE 開頭的 0 不被試算表吃掉
+function keepText_(f, v) {
+  return (f === 'phone' || f === 'line') && /^\d/.test(v) ? "'" + v : v;
+}
+
 function clean_(v) {
   return String(v == null ? '' : v).slice(0, 600).replace(/^[=+\-@]/, "'$&");
 }
