@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """建置時抓取各開發案周邊生活機能（OpenStreetMap / Overpass API），寫入 data/amenities.json。
-任何一案失敗都保留舊資料，不會讓建置失敗。總時間上限約 5 分鐘。
+任何一案失敗都保留舊資料，不會讓建置失敗。總時間上限約 2 分鐘（免費 Overpass 伺服器常忙碌，逐次累積）。
 資料會發佈到網站 /data/amenities.json；下次建置先從線上取回，只補抓缺的或超過 30 天的案子，逐次累積。
 """
 import json, math, os, re, time, urllib.parse, urllib.request
@@ -8,6 +8,8 @@ import json, math, os, re, time, urllib.parse, urllib.request
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'data', 'amenities.json')
 P = json.load(open(os.path.join(ROOT, 'data', 'projects.json'), encoding='utf-8'))
+START, LIMIT = time.time(), 100
+LIVE = 'https://believeland-tw.pages.dev/data/amenities.json'
 old = json.load(open(OUT, encoding='utf-8')) if os.path.exists(OUT) else {}
 try:
     with urllib.request.urlopen(urllib.request.Request(LIVE, headers={'User-Agent': 'believeland.tw build'}), timeout=20) as r:
@@ -18,8 +20,6 @@ except Exception as ex:
     print('線上周邊機能取回略過', type(ex).__name__)
 EPS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter',
        'https://maps.mail.ru/osm/tools/overpass/api/interpreter']
-START, LIMIT = time.time(), 270
-LIVE = 'https://believeland-tw.pages.dev/data/amenities.json'
 
 
 def radius(p):

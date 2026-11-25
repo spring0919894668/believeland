@@ -18,7 +18,7 @@ OUT = D('dist')
 if os.environ.get('CF_PAGES') or os.environ.get('FETCH_AMENITIES'):
     import subprocess, sys
     try:
-        subprocess.run([sys.executable, D('fetch_amenities.py')], timeout=330)
+        subprocess.run([sys.executable, D('fetch_amenities.py')], timeout=150)
     except Exception as ex:
         print('周邊機能抓取略過：', ex)
 CFG = json.load(open(D('data/site.json'), encoding='utf-8'))
