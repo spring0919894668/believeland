@@ -1,0 +1,465 @@
+{
+ "_說明": "各開發案的政府出處。k=類型：plan 計畫書/公展書圖（多含計畫範圍圖）、record 審議或公聽會紀錄、page 官方專頁、news 政府新聞稿、report 政府報告、agency 主管機關網站（尚未找到個案頁時使用）。每月可人工補充。",
+ "tyaero": [
+  {
+   "k": "page",
+   "o": "桃園市政府",
+   "t": "桃園航空城計畫（計畫面積、開發期程與示意圖）",
+   "u": "https://invest.tycg.gov.tw/cp.aspx?n=828"
+  },
+  {
+   "k": "plan",
+   "o": "政府資料開放平臺",
+   "t": "航空城都市計畫：附近地區第一期發展區區段徵收面積表",
+   "u": "https://data.gov.tw/dataset/31872"
+  }
+ ],
+ "tamsui": [
+  {
+   "k": "plan",
+   "o": "內政部國土管理署",
+   "t": "擬定淡海新市鎮特定區第二期發展區第一開發區細部計畫書（115年7月公展）",
+   "u": "https://www.nlma.gov.tw/uploads/files/56d3ddd211e25884cced8d2bf3bc86f6.pdf"
+  }
+ ],
+ "fengjiang": [
+  {
+   "k": "plan",
+   "o": "新北市政府城鄉發展局",
+   "t": "新北市區域計畫（核定版，含泰山楓江產業型新訂擴大都市計畫）",
+   "u": "https://www.planning.ntpc.gov.tw/userfiles/1090800/files/%E6%96%B0%E5%8C%97%E5%B8%82%E5%8D%80%E5%9F%9F%E8%A8%88%E7%95%AB%E6%B3%95%E5%AE%9A%E6%9B%B8%E5%9C%96%E6%A0%B8%E5%AE%9A%E7%89%88+Part+3.pdf"
+  },
+  {
+   "k": "record",
+   "o": "內政部國土管理署",
+   "t": "新北市國土功能分區審查意見（泰山楓江地區列城鄉發展地區第2類之3）",
+   "u": "https://www.nlma.gov.tw/uploads/files/cf77607770573cb1b9bc205052f9f505.pdf"
+  }
+ ],
+ "puqian": [
+  {
+   "k": "report",
+   "o": "新北市政府地政局",
+   "t": "板橋埔墘4-7區區段徵收案：計畫內容與成本效益分析（含範圍說明）",
+   "u": "https://www-ws.land.ntpc.gov.tw/001/Upload/399/relfile/8993/2222/a1926727-7d9e-47ec-94d8-abb43d4633f3.pdf"
+  }
+ ],
+ "bitan": [
+  {
+   "k": "agency",
+   "o": "新北市政府城鄉發展局",
+   "t": "主管機關網站（變更新店都市計畫 F 單元）",
+   "u": "https://www.planning.ntpc.gov.tw/"
+  }
+ ],
+ "shulin": [
+  {
+   "k": "agency",
+   "o": "新北市政府城鄉發展局",
+   "t": "主管機關網站（樹林機五都市計畫擬定中）",
+   "u": "https://www.planning.ntpc.gov.tw/"
+  }
+ ],
+ "ankeng": [
+  {
+   "k": "agency",
+   "o": "新北市政府城鄉發展局",
+   "t": "主管機關網站（變更新店都市計畫第三次通盤檢討 D、H、I 單元）",
+   "u": "https://www.planning.ntpc.gov.tw/"
+  }
+ ],
+ "shezi": [
+  {
+   "k": "news",
+   "o": "臺北市政府地政局土地開發總隊",
+   "t": "社子島開發範圍及抵價地比例內政部審議通過",
+   "u": "https://www-ws.gov.taipei/001/Upload/305/relfile/11569/9123122/dc0a4b7c-c20f-4de4-854e-0cbd82ea16c6.pdf"
+  },
+  {
+   "k": "plan",
+   "o": "政府資料開放平臺",
+   "t": "臺北市區段徵收區範圍圖（SHP）",
+   "u": "https://data.gov.tw/dataset/121676"
+  }
+ ],
+ "beishike": [
+  {
+   "k": "page",
+   "o": "臺北市政府",
+   "t": "北投士林科技園區專案網站",
+   "u": "https://bstp.gov.taipei/"
+  },
+  {
+   "k": "plan",
+   "o": "臺北市政府",
+   "t": "變更主要計畫為北投士林科技園區案（區段徵收範圍）計畫書",
+   "u": "https://bstp.gov.taipei/download/%E8%87%BA%E5%8C%97%E5%B8%82%E5%8C%97%E6%8A%95%E5%A3%AB%E6%9E%97%E7%A7%91%E6%8A%80%E5%9C%92%E5%8D%80%E6%A1%88_%E5%8D%80%E6%AE%B5%E5%BE%B5%E6%94%B6%E7%AF%84%E5%9C%8D%E2%80%94%E4%B8%BB%E8%A6%81%E8%A8%88%E7%95%AB.pdf"
+  }
+ ],
+ "taizhi": [
+  {
+   "k": "report",
+   "o": "監察院",
+   "t": "新訂台灣知識經濟旗艦園區特定區計畫案調查意見",
+   "u": "https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/53738"
+  },
+  {
+   "k": "agency",
+   "o": "新竹縣政府",
+   "t": "主管機關網站",
+   "u": "https://www.hsinchu.gov.tw/"
+  }
+ ],
+ "hsp3": [
+  {
+   "k": "report",
+   "o": "監察院",
+   "t": "竹東鎮（工研院暨附近地區）特定區計畫調查報告（計畫範圍約453.84公頃）",
+   "u": "https://cybsbox.cy.gov.tw/CYBSBoxSSL/edoc/download/48539"
+  },
+  {
+   "k": "agency",
+   "o": "新竹縣政府",
+   "t": "主管機關網站",
+   "u": "https://www.hsinchu.gov.tw/"
+  }
+ ],
+ "mlhsr": [
+  {
+   "k": "agency",
+   "o": "苗栗縣政府",
+   "t": "主管機關網站（高速鐵路苗栗車站特定區計畫）",
+   "u": "https://www.miaoli.gov.tw/"
+  }
+ ],
+ "ylhsr": [
+  {
+   "k": "record",
+   "o": "內政部國土管理署",
+   "t": "宜蘭縣國土功能分區圖審議簡報（新訂高速鐵路宜蘭車站特定區都市計畫）",
+   "u": "https://sptw.nlma.gov.tw/Files/Library/4c645fc7-f228-4829-b502-fa8a9b599cb3.pdf"
+  }
+ ],
+ "jiude": [
+  {
+   "k": "plan",
+   "o": "臺中市政府",
+   "t": "變更烏日大肚地區主要計畫（配合九德地區區段徵收開發）公展書",
+   "u": "https://www.ud.taichung.gov.tw/media/1332539/%E7%83%8F%E6%97%A5%E4%B8%BB%E8%A8%88-%E9%85%8D%E5%90%88%E4%B9%9D%E5%BE%B7%E5%8D%80%E5%BE%B5-%E7%AC%AC%E4%BA%8C%E6%AC%A1-%E5%85%AC%E5%B1%95%E6%9B%B8-%E4%B8%8A%E7%B6%B2%E7%89%88.pdf"
+  },
+  {
+   "k": "record",
+   "o": "臺中市政府",
+   "t": "九德區徵案公展說明會紀錄（工程進度）",
+   "u": "https://www.taichung.gov.tw/media/1343839/%E5%85%AC%E5%B1%95%E8%AA%AA%E6%98%8E%E6%9C%83%E6%9C%83%E8%AD%B0%E7%B4%80%E9%8C%84-%E5%8D%97%E5%8D%80-%E7%83%8F%E6%97%A5-%E5%8D%97%E5%B1%AF.pdf"
+  }
+ ],
+ "qianzhu": [
+  {
+   "k": "record",
+   "o": "臺中市政府地政局",
+   "t": "烏日前竹地區區段徵收公聽會說明資料",
+   "u": "https://cdn.www.taichung.gov.tw/media/655740/%E5%89%8D%E7%AB%B9_%E5%8D%80%E6%AE%B5%E5%BE%B5%E6%94%B6%E5%85%AC%E8%81%BD%E6%9C%83%E8%AA%AA%E6%98%8E%E8%B3%87%E6%96%991100315.pdf"
+  }
+ ],
+ "xiatian": [
+  {
+   "k": "plan",
+   "o": "臺中市政府經濟發展局",
+   "t": "擬定擴大大里都市計畫（大里夏田產業園區）公告徵求意見宣傳單（含範圍圖）",
+   "u": "https://www.economic.taichung.gov.tw/media/336489/107514-%E5%A4%A7%E9%87%8C%E5%A4%8F%E7%94%B0%E5%BA%A7%E8%AB%87%E6%9C%83%E5%AE%A3%E5%82%B3%E5%96%AE.pdf"
+  }
+ ],
+ "tucheng": [
+  {
+   "k": "page",
+   "o": "臺中市政府經濟發展局",
+   "t": "新訂大里塗城都市計畫（產業型）專頁",
+   "u": "https://www.economic.taichung.gov.tw/43673/post"
+  },
+  {
+   "k": "plan",
+   "o": "臺中市政府經濟發展局",
+   "t": "新訂大里塗城都市計畫地方座談會簡報（計畫範圍35.95公頃）",
+   "u": "https://www.economic.taichung.gov.tw/media/888501/1111220%E6%96%B0%E8%A8%82%E5%A1%97%E5%9F%8E%E5%BA%A7%E8%AB%87%E6%9C%83.pdf"
+  }
+ ],
+ "xinan": [
+  {
+   "k": "plan",
+   "o": "臺中市政府經濟發展局",
+   "t": "新訂烏日（溪南）產業發展特定區計畫地方座談會簡報（含範圍）",
+   "u": "https://www.economic.taichung.gov.tw/media/888192/111%E5%B9%B412%E6%9C%8818%E6%97%A5%E6%96%B0%E8%A8%82%E7%83%8F%E6%97%A5-%E6%BA%AA%E5%8D%97-%E7%94%A2%E6%A5%AD%E7%99%BC%E5%B1%95%E7%89%B9%E5%AE%9A%E5%8D%80%E8%A8%88%E7%95%AB%E8%A6%8F%E5%8A%83%E6%A1%88%E5%9C%B0%E6%96%B9%E5%BA%A7%E8%AB%87%E6%9C%83%E7%B0%A1%E5%A0%B1.pdf"
+  }
+ ],
+ "shengang": [
+  {
+   "k": "plan",
+   "o": "臺中市政府經濟發展局",
+   "t": "擬定擴大豐潭雅神地區都市計畫（神岡產業園區）公告徵求意見宣傳單（含範圍圖）",
+   "u": "https://www.economic.taichung.gov.tw/media/1297178/%E5%AE%A3%E5%82%B3%E5%96%AE-%E5%90%AB%E6%84%8F%E8%A6%8B%E5%96%AE.pdf"
+  }
+ ],
+ "tanzi": [
+  {
+   "k": "plan",
+   "o": "臺中市政府",
+   "t": "潭子聚興產業園區申請書暨開發計畫書（土地使用）",
+   "u": "https://www.ud.taichung.gov.tw/media/734645/1060811%E6%BD%AD%E5%AD%90%E8%81%9A%E8%88%88%E7%94%A2%E6%A5%AD%E5%9C%92%E5%8D%80%E9%96%8B%E7%99%BC%E8%A8%88%E7%95%AB-%E5%9C%9F%E5%9C%B0%E4%BD%BF%E7%94%A8%E5%88%86%E5%8D%80%E7%AE%A1%E5%88%B6.pdf"
+  }
+ ],
+ "chhsr": [
+  {
+   "k": "plan",
+   "o": "彰化縣政府地政處",
+   "t": "高速鐵路彰化車站特定區區段徵收可建築土地標售須知",
+   "u": "https://land.chcg.gov.tw/files/_@$110-0512%E7%AC%AC25%E6%AC%A1%E6%A8%99%E5%96%AE%E8%B3%87%E6%96%99(%E5%85%A8)PDF_32_1100412.pdf"
+  },
+  {
+   "k": "page",
+   "o": "彰化縣政府建設處",
+   "t": "城鄉計畫便民服務網（都市計畫書圖查詢）",
+   "u": "https://urbangis.chcg.gov.tw/"
+  }
+ ],
+ "ylic": [
+  {
+   "k": "page",
+   "o": "彰化縣政府建設處",
+   "t": "城鄉計畫便民服務網（員林交流道附近特定區計畫書圖）",
+   "u": "https://urbangis.chcg.gov.tw/"
+  }
+ ],
+ "chic": [
+  {
+   "k": "record",
+   "o": "彰化縣都市計畫委員會",
+   "t": "第286次會議紀錄：彰化交流道附近特定區第四次通盤檢討",
+   "u": "https://urbangis.chcg.gov.tw/urbanfiles/Meetings/MT000002000215.pdf"
+  }
+ ],
+ "shuiwujin": [
+  {
+   "k": "plan",
+   "o": "彰化縣政府",
+   "t": "擬定彰化水五金田園生產聚落特定區主要計畫書（114年9月再公展）",
+   "u": "https://urbangis.chcg.gov.tw/urbanfiles/Plans/Public/PP000004000191.pdf"
+  }
+ ],
+ "chcity": [
+  {
+   "k": "record",
+   "o": "彰化縣都市計畫委員會",
+   "t": "會議紀錄：擬定擴大彰化市都市計畫主要計畫報告案",
+   "u": "https://urbangis.chcg.gov.tw/urbanfiles/Meetings/MT000002000218.pdf"
+  },
+  {
+   "k": "plan",
+   "o": "內政部國土管理署",
+   "t": "彰化縣國土計畫（擴大彰化市都市計畫列城鄉發展地區第二類之三）",
+   "u": "https://www.nlma.gov.tw/uploads/files/206139ab0c31c088c7ffa9a2f164030f.pdf"
+  }
+ ],
+ "erlin": [
+  {
+   "k": "record",
+   "o": "彰化縣政府",
+   "t": "二林精密機械產業園區公聽會紀錄",
+   "u": "https://files.chcg.gov.tw/files/47_20230511090438758_1120508-%E5%85%AC%E8%81%BD%E6%9C%83%E6%B0%91%E7%9C%BE%E6%84%8F%E8%A6%8B%E7%B4%80%E9%8C%84%E5%88%9D%E7%A8%BFv2-%E7%B0%BD%E5%88%B0%E7%B0%BF%E5%85%AC%E5%91%8A%E7%89%88v2.1.pdf"
+  },
+  {
+   "k": "record",
+   "o": "內政部區域計畫委員會",
+   "t": "二林精密機械產業園區開發計畫專案小組會議紀錄",
+   "u": "https://www.nlma.gov.tw/filesys/file/chinese/committee/apc/1040816322.pdf"
+  }
+ ],
+ "zhongxing": [
+  {
+   "k": "report",
+   "o": "國家發展委員會",
+   "t": "中興新村整體規劃之開發計畫與都市設計案結案報告",
+   "u": "https://ws.ndc.gov.tw/001/administrator/10/relfile/5680/4461/0009059.pdf"
+  },
+  {
+   "k": "agency",
+   "o": "國家發展委員會",
+   "t": "主管機關網站（中興新村活化專案辦公室）",
+   "u": "https://www.ndc.gov.tw/"
+  }
+ ],
+ "mailiao": [
+  {
+   "k": "plan",
+   "o": "雲林縣政府",
+   "t": "雲林縣國土計畫（核定版，新訂麥寮特定區計畫第一期200公頃）",
+   "u": "https://www.nlma.gov.tw/uploads/files/c3de4c6ed31f79c3257f3acf85b16776.pdf"
+  }
+ ],
+ "huwei": [
+  {
+   "k": "agency",
+   "o": "雲林縣政府",
+   "t": "主管機關網站（高速鐵路雲林車站特定區計畫）",
+   "u": "https://www.yunlin.gov.tw/"
+  }
+ ],
+ "huwei2": [
+  {
+   "k": "plan",
+   "o": "雲林縣政府",
+   "t": "雲林縣國土計畫（核定版，擴大虎尾都市計畫第一期209公頃）",
+   "u": "https://www.nlma.gov.tw/uploads/files/c3de4c6ed31f79c3257f3acf85b16776.pdf"
+  },
+  {
+   "k": "record",
+   "o": "內政部國土管理署",
+   "t": "擴大虎尾都市計畫相關審議資料",
+   "u": "https://sptw.nlma.gov.tw/Files/Library/523a8c0e-dcd9-4583-ae04-ff40d03a9b71.pdf"
+  }
+ ],
+ "cyseat": [
+  {
+   "k": "agency",
+   "o": "嘉義縣政府",
+   "t": "主管機關網站（擴大縣治所在地市地重劃）",
+   "u": "https://www.cyhg.gov.tw/"
+  }
+ ],
+ "machouhou": [
+  {
+   "k": "record",
+   "o": "內政部區域計畫委員會",
+   "t": "馬稠後產業園區專案小組審查紀錄",
+   "u": "https://www.nlma.gov.tw/filesys/file/chinese/committee/apc/10308063081.pdf"
+  },
+  {
+   "k": "agency",
+   "o": "嘉義縣政府",
+   "t": "主管機關網站",
+   "u": "https://www.cyhg.gov.tw/"
+  }
+ ],
+ "jiabei": [
+  {
+   "k": "agency",
+   "o": "嘉義市政府",
+   "t": "主管機關網站（嘉北車站周邊都市計畫區段徵收）",
+   "u": "https://www.chiayi.gov.tw/"
+  }
+ ],
+ "cyind": [
+  {
+   "k": "news",
+   "o": "內政部",
+   "t": "嘉義北港路開發案依法為嘉義縣市聯合審議案件",
+   "u": "https://www.moi.gov.tw/News_Content.aspx?n=8&s=323174"
+  },
+  {
+   "k": "agency",
+   "o": "嘉義市政府",
+   "t": "主管機關網站",
+   "u": "https://www.chiayi.gov.tw/"
+  }
+ ],
+ "nanke": [
+  {
+   "k": "agency",
+   "o": "臺南市政府地政局",
+   "t": "主管機關網站（南科特定區開發區塊區段徵收）",
+   "u": "https://land.tainan.gov.tw/"
+  }
+ ],
+ "tntech": [
+  {
+   "k": "agency",
+   "o": "臺南市政府地政局",
+   "t": "主管機關網站（臺南科技產業專區開發案）",
+   "u": "https://land.tainan.gov.tw/"
+  }
+ ],
+ "shalun": [
+  {
+   "k": "agency",
+   "o": "臺南市政府都市發展局",
+   "t": "主管機關網站（高速鐵路臺南車站特定區計畫）",
+   "u": "https://ud.tainan.gov.tw/"
+  }
+ ],
+ "qiaotou": [
+  {
+   "k": "plan",
+   "o": "高雄市政府地政局（國土管理署網站）",
+   "t": "高雄新市鎮第二期細部計畫（配合設置產業用地）區段徵收作業說明",
+   "u": "https://www.nlma.gov.tw/filesys/depplanfile/58_f62d849e6f2dc788e930ef26710d9f5b.pdf"
+  }
+ ],
+ "ns3": [
+  {
+   "k": "plan",
+   "o": "內政部國土管理署",
+   "t": "高雄新市鎮第三期發展區：區段徵收意願調查說明會簡報（含範圍）",
+   "u": "https://www.nlma.gov.tw/uploads/files/2b3a294184f0e21f14017a8d9def523e.pdf"
+  },
+  {
+   "k": "news",
+   "o": "內政部",
+   "t": "高雄新市鎮第三期 持續彙整各界意見",
+   "u": "https://www.moi.gov.tw/News_Content.aspx?n=8&s=338207"
+  }
+ ],
+ "dashe": [
+  {
+   "k": "news",
+   "o": "高雄市政府都市發展局",
+   "t": "高市都委會審議通過大社96公頃區段徵收地區檢討",
+   "u": "https://kupc.kcg.gov.tw/KUPT/web_upload/KPA0003/20220225094148-1.pdf"
+  }
+ ],
+ "nuk": [
+  {
+   "k": "agency",
+   "o": "高雄市政府地政局",
+   "t": "主管機關網站（高雄大學區段徵收區土地標售）",
+   "u": "https://landp.kcg.gov.tw/"
+  }
+ ],
+ "k205": [
+  {
+   "k": "report",
+   "o": "高雄市政府地政局",
+   "t": "115年度施政計畫（第205兵工廠區段徵收）",
+   "u": "https://orgws.kcg.gov.tw/001/KcgOrgUploadFiles/412/RelFile/74256/68161/cffb71a2-baef-44be-b57c-465ddc090aa1.pdf"
+  }
+ ],
+ "pthsr": [
+  {
+   "k": "news",
+   "o": "行政院",
+   "t": "院長視察高速鐵路屏東車站特定區六大建設",
+   "u": "https://www.ey.gov.tw/Page/9277F759E41CCD91/97783319-8c68-4cda-856d-cf678ac93218"
+  },
+  {
+   "k": "agency",
+   "o": "屏東縣政府",
+   "t": "主管機關網站",
+   "u": "https://www.pthg.gov.tw/"
+  }
+ ],
+ "hualien": [
+  {
+   "k": "record",
+   "o": "內政部國土管理署",
+   "t": "整併及擴大大花蓮都市計畫相關審議資料",
+   "u": "https://www.nlma.gov.tw/uploads/files/0d686885cf5b48bac700f4c13b96b44e.pdf"
+  }
+ ],
+ "taitung": [
+  {
+   "k": "agency",
+   "o": "臺東縣政府",
+   "t": "主管機關網站（豐榮、豐樂（南區）區段徵收）",
+   "u": "https://www.taitung.gov.tw/"
+  }
+ ]
+}

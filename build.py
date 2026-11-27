@@ -27,6 +27,8 @@ NEWS_ALL = json.load(open(D('data/news.json'), encoding='utf-8'))
 NEWS = NEWS_ALL.get('projects', {})
 NEWS_AT = NEWS_ALL.get('updatedAt', '')
 LIST = json.load(open(D('data/listings.json'), encoding='utf-8'))
+GOV = json.load(open(D('data/gov_sources.json'), encoding='utf-8'))
+GOVK = {'plan': '計畫書圖', 'record': '審議／公聽會紀錄', 'page': '官方專頁', 'news': '政府新聞稿', 'report': '政府報告', 'agency': '主管機關'}
 AMEN = json.load(open(D('data/amenities.json'), encoding='utf-8')) if os.path.exists(D('data/amenities.json')) else {}
 ACAT = [('交通', '#2f6db0'), ('學校', '#7a4bb3'), ('醫療', '#d4502a'), ('購物', '#c9a227'), ('公共服務', '#2f8a57'), ('公園綠地', '#5a9e3a')]
 SITE = CFG['site'].rstrip('/')
@@ -529,6 +531,11 @@ for p in P:
             amen_html += f'<div class="fn"><span class="dot" style="background:{ccol}"></span><b>{cname}</b> <span class="muted small">{len(xs)}{"+" if len(xs) >= 25 else ""} 處</span><br><span class="small">{top3}</span></div>'
     else:
         amen_html = '<p class="note">周邊機能清單逐步建置中；上方地圖預設為臺灣通用電子地圖，已標示學校、車站、醫院與公所等設施。</p>'
+    gl = GOV.get(p['id'], [])
+    gov_items = ''.join(f'<li><span style="font-size:11px;padding:1px 6px;border-radius:6px;background:var(--soft);border:1px solid var(--line);white-space:nowrap">{GOVK.get(g["k"], "")}</span> <a href="{e(safe_url(g["u"]))}" target="_blank" rel="noopener">{e(g["t"])}</a> <span class="small muted">— {e(g["o"])}</span></li>' for g in gl)
+    gov_html = f'<ul class="facts small">{gov_items}</ul>' if gl else '<p class="note">政府出處整理中。</p>'
+    if gl and all(g['k'] == 'agency' for g in gl):
+        gov_html += '<p class="note">本案尚未找到可直接引用的計畫書圖網址，先列主管機關網站；計畫書圖公開後會補上。</p>'
     near = sorted(((l, hav(p['lat'], p['lng'], float(l['lat']), float(l['lng']))) for l in LIST if l.get('lat') and l.get('lng')), key=lambda t: t[1])
     near = [t for t in near if t[1] <= 5][:6]
     same = [q for q in P if q['county'] == p['county'] and q['id'] != p['id']]
@@ -546,9 +553,10 @@ for p in P:
 <div class="kpis"><div><b>{STAGE[s]}</b><span>開發階段</span></div><div><b>{pt['dev']}</b><span>發展性分數</span></div><div><b>{pt['base']}</b><span>價格基期分數</span></div><div><b>{pt['pri']}</b><span>佈局優先分數</span></div></div>
 <h2>開發進度</h2><div class="track">{track}</div>{note}
 <h2>重點事實</h2><ul class="facts">{''.join(f'<li>{e(f)}</li>' for f in p['facts'])}</ul>
+<h2>政府出處</h2>{gov_html}
 {f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
 <h2>相關新聞</h2>{news_html(n)}
-<p class="note">新聞每月 1 日自動更新；查證來源：<a href="{e(safe_url(p['src']))}" target="_blank" rel="nofollow noopener noreferrer">{e(p['srcN'])}</a></p>
+<p class="note">新聞每月 1 日自動更新；新聞來源：<a href="{e(safe_url(p['src']))}" target="_blank" rel="nofollow noopener noreferrer">{e(p['srcN'])}</a></p>
 </div><div>
 <div class="mapbox">{map_svg(P, (X(p['lng']) - 45, Y(p['lat']) - 55, 90, 110), highlight=p['id'])}</div>
 <div class="card" style="margin-top:16px"><h3>投資觀點</h3><p><b>{quad}</b></p><p class="muted small">{e(pt['why'])}</p>
@@ -558,14 +566,15 @@ for p in P:
 {f'<div class="card" style="margin-top:16px"><h3>{e(p["county"])}其他開發案</h3>' + ''.join(f'<p style="margin:6px 0"><a href="/project/{q["id"]}/">{e(q["name"])}</a> <span class="small muted">{STAGE[stage_of(q["step"])]}</span></p>' for q in same) + '</div>' if same else ''}
 </div></div></div></section>
 <section class="band" style="background:var(--soft)"><div class="wrap">
-<h2>{e(p['name'])}計畫範圍與周邊環境機能地圖</h2>
-<p class="muted">{e(p['name'])}位於{e(p['county'])}{e(p['town'])}。{'地圖上的橘色虛線圈是依計畫面積（' + e(p['area']) + '）推估的示意範圍' if pr_ok else '本案計畫面積尚未公開，橘色虛線圈以半徑 800 公尺示意'}，實際範圍請以都市計畫圖為準。右上角可切換街道地圖、臺灣通用電子地圖與空照圖，彩色圓點為周邊交通、學校、醫療、購物等生活機能。</p>
-<div class="cols" style="margin-top:14px"><div id="pmap" data-lat="{p['lat']}" data-lng="{p['lng']}" data-r="{pr}" data-name="{e(p['name'])}" data-amen="{e(json.dumps(amen_pts, ensure_ascii=False, separators=(',', ':')))}" role="region" aria-label="{e(p['name'])}範圍與周邊地圖"></div>
+<h2>{e(p['name'])}位置與政府土地使用分區圖</h2>
+<p class="muted">{e(p['name'])}位於{e(p['county'])}{e(p['town'])}。地圖疊加的是政府圖資：<b>內政部國土測繪中心「非都市土地使用分區圖」</b>（有顏色的是農業區、鄉村區等非都市土地，<b>沒有上色的空白區塊就是既有都市計畫區</b>）與<b>地段界線（段籍圖）</b>{'，以及<b>嘉義市政府都市計畫使用分區圖</b>' if p['county'] == '嘉義市' else ''}。新訂、擴大中的計畫還沒公告，地圖上不會出現新的範圍線，<b>正式範圍請看右側「官方計畫範圍」的計畫書圖</b>。藍色標記為計畫位置參考點，不代表範圍。</p>
+<div class="cols" style="margin-top:14px"><div id="pmap" data-lat="{p['lat']}" data-lng="{p['lng']}" data-cyc="{1 if p['county'] == '嘉義市' else 0}" data-name="{e(p['name'])}" data-amen="{e(json.dumps(amen_pts, ensure_ascii=False, separators=(',', ':')))}" role="region" aria-label="{e(p['name'])}位置與政府土地使用分區圖"></div>
 <div class="card"><h3>周邊生活機能</h3><div id="pmapList">{amen_html}</div>
-<h3 style="margin-top:16px">查詢正式計畫範圍</h3><ul class="facts small">
-<li><a href="https://luz.tcd.gov.tw/web/" target="_blank" rel="noopener">全國土地使用分區資料查詢系統</a>：可套疊地籍圖、都市計畫使用分區圖與非都市土地使用分區</li>
-<li><a href="https://nsp.tcd.gov.tw/tcdgis/" target="_blank" rel="noopener">國土規劃地理資訊圖台</a>：國土計畫功能分區與環境敏感地區</li>
-<li><a href="https://www.google.com/maps/search/?api=1&query={p['lat']},{p['lng']}" target="_blank" rel="noopener">在 Google 地圖開啟</a></li></ul></div></div>
+<h3 style="margin-top:16px">官方計畫範圍（政府出處）</h3>{gov_html}
+<h3 style="margin-top:16px">自行查詢地號分區</h3><ul class="facts small">
+<li><a href="https://luz.tcd.gov.tw/web/" target="_blank" rel="noopener">全國土地使用分區資料查詢系統</a>（內政部國土管理署）：輸入地段地號，可查都市計畫使用分區與非都市土地使用分區</li>
+<li><a href="https://maps.nlsc.gov.tw/" target="_blank" rel="noopener">國土測繪圖資服務雲</a>（內政部國土測繪中心）：可疊加地籍、都市計畫與非都市分區圖層</li>
+<li><a href="https://nsp.tcd.gov.tw/tcdgis/" target="_blank" rel="noopener">國土規劃地理資訊圖台</a>：國土功能分區與環境敏感地區</li></ul></div></div>
 </div></section>"""
     desc = f'{p["name"]}（{p["county"]}{p["town"]}）最新進度：{STEPS[p["step"]]}。{p["facts"][0]}。附每月相關新聞、風險提示與周邊農地投資觀點。'
     ld = {'@context': 'https://schema.org', '@type': 'WebPage', 'name': p['name'], 'description': desc, 'url': f'{SITE}/project/{p["id"]}/',
