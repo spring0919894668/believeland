@@ -969,6 +969,8 @@ for path, lm, pr in PAGES:
     sm += f'<url><loc>{SITE}{quote(path)}</loc><lastmod>{(lm or TODAY)[:10]}</lastmod><priority>{pr}</priority></url>\n'
 open(D('dist/sitemap.xml'), 'w', encoding='utf-8').write(sm + '</urlset>\n')
 open(D('dist/CNAME'), 'w').write(SITE.split('://')[1] + '\n')
+for _vf in os.listdir(D('src/verify')) if os.path.isdir(D('src/verify')) else []:
+    shutil.copy(D('src/verify', _vf), D('dist', _vf))
 
 # ===== 社群分享圖 =====
 if os.path.exists(D('src/og.png')):
