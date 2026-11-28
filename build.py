@@ -128,6 +128,14 @@ EXTRA_CSS = """
 .colmeta{font-size:14px;color:var(--mute)}.byline{font-size:14px;color:var(--mute);border-top:1px solid var(--line);margin-top:30px;padding-top:12px}
 .colcard .k{font-size:14px;color:var(--mute);margin:6px 0 0}
 """
+import ig as IG
+EXTRA_CSS += IG.CSS + '''
+.eyebrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--mute);margin:0 0 6px}
+.related{margin-top:36px;padding-top:20px;border-top:1px solid var(--line)}.related h2{font-size:22px}
+.ctab{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--field);color:var(--fieldInk);border-radius:16px;padding:18px 22px;margin-top:28px}.ctab h3{margin:0}.ctab p{margin:4px 0 0;opacity:.85}
+.gcard{display:grid;grid-template-columns:48px 1fr;gap:4px 14px;align-items:start}.gcard .gi{grid-row:span 2;width:48px;height:48px;border-radius:14px;background:var(--field);display:grid;place-items:center}.gcard h3{margin:0}
+.cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
+'''
 NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '委託刊登')]
 LOGO = '<svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" rx="8" fill="#e8d36a"/><g fill="none" stroke="#1d4a33" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#e8d36a"/></svg>'
 FAVICON = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="#1d4a33"/><g fill="none" stroke="#e8d36a" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#1d4a33"/></svg>'
@@ -159,8 +167,9 @@ def site_header(active):
             f'<nav aria-label="主選單">{nav}</nav>{call}</div></header>')
 
 
-def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow', og_type='website', head_extra=''):
+def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow', og_type='website', head_extra='', og=None):
     url = SITE + path
+    ogi = f'{SITE}/assets/og/{og}.png' if og else f'{SITE}/assets/og.png'
     ld = ''
     for j in (jsonld or []):
         ld += '<script type="application/ld+json">' + json.dumps(j, ensure_ascii=False).replace('<', '\\u003c') + '</script>\n'
@@ -171,14 +180,18 @@ def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow'
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="robots" content="{robots}">
+<meta name="robots" content="{robots}{",max-image-preview:large" if robots.startswith("index") else ""}">
 <link rel="canonical" href="{e(url)}">
 <meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="{e(BRAND)}">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{e(url)}">
-<meta property="og:image" content="{SITE}/assets/og.png">
+<meta property="og:image" content="{ogi}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{e(title)}">
+<meta name="twitter:image" content="{ogi}">
 <meta property="og:locale" content="zh_TW">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -195,10 +208,29 @@ def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow'
 <div><b style="font-size:17px">{e(BRAND)}｜{e(CFG.get('tagline', ''))}</b><p>整理全台區段徵收、特定區、新訂擴大都市計畫與產業園區進度，協助投資人評估農地的未來發展潛力。</p><p>{broker_line()}</p><ul>{contact_html()}</ul></div>
 <div><b>依區域</b><ul>{''.join(f'<li><a href="/county/{CSLUG[c]}/">{e(c)}農地開發案</a></li>' for c in COUNTIES[:10])}</ul></div>
 <div><b>&nbsp;</b><ul>{''.join(f'<li><a href="/county/{CSLUG[c]}/">{e(c)}農地開發案</a></li>' for c in COUNTIES[10:])}</ul></div>
-<div><b>投資指南</b><ul><li><a href="/guide/expropriation/">區段徵收與重劃差在哪</a></li><li><a href="/guide/risk/">投資風險與長期佈局</a></li><li><a href="/guide/tax/">農地節稅重點</a></li><li><a href="/guide/family-office/">家族辦公室與資產傳承</a></li><li><a href="/about/">關於與免責聲明</a></li></ul></div>
+<div><b>投資指南</b><ul><li><a href="/guide/expropriation/">區段徵收與重劃差在哪</a></li><li><a href="/guide/risk/">投資風險與長期佈局</a></li><li><a href="/guide/tax/">農地稅負一張圖</a></li><li><a href="/guide/family-office/">家族辦公室與資產傳承</a></li><li><a href="/about/">關於與免責聲明</a></li></ul></div>
 </div><p class="wrap note" style="color:var(--fieldInk);opacity:.8;margin-top:18px">本網站提供資訊整理與試算，非投資建議；開發案資訊以政府公告為準。新聞資料更新於 {e(NEWS_AT)}。</p></footer>
 </body>
 </html>"""
+
+
+def hero(cb, eyebrow, title, lede, kpis=None):
+    """所有頁面共用頁首：導覽路徑、分類標籤、標題、導言、關鍵數字。"""
+    k = ('<div class="kpis">' + ''.join(f'<div><b>{v}</b><span>{e(l)}</span></div>' for v, l in kpis) + '</div>') if kpis else ''
+    return f'{cb}<p class="eyebrow">{eyebrow}</p><h1>{e(title)}</h1><p class="lede muted">{e(lede)}</p>{k}'
+
+
+def cta(title, sub, href, btn='填寫委託表單'):
+    return f'<div class="ctab"><div><h3>{e(title)}</h3><p>{e(sub)}</p></div><a class="btn" style="background:var(--rice);color:#1b2a12;border:0" href="{href}">{e(btn)} →</a></div>'
+
+
+def related(items, title='延伸閱讀'):
+    """items: [(href, title, sub)]"""
+    if not items: return ''
+    return f'<nav class="related" aria-label="{e(title)}"><h2>{e(title)}</h2><div class="pgrid">' + ''.join(f'<a class="pcard" href="{h}"><h3>{e(t)}</h3><p class="small muted" style="margin:0">{e(s)}</p></a>' for h, t, s in items) + '</div></nav>'
+
+
+GUIDE_IC = {'/guide/expropriation/': 'grid', '/guide/risk/': 'shield', '/guide/tax/': 'coin', '/guide/family-office/': 'people'}
 
 
 # ---------- 台灣地圖（SVG） ----------
@@ -273,6 +305,12 @@ ORG['legalName'] = CFG.get('broker_name', '')
 if CFG.get('email'): ORG['email'] = CFG['email']
 
 PAGES = []  # (path, lastmod, priority)
+OGQ = {}  # slug -> (title, sub, color)
+
+
+def og(slug, title, sub, col='#1d4a33'):
+    OGQ[slug] = (title, sub, col)
+    return slug
 
 
 def write(path, content, lastmod=None, prio='0.6', sitemap=True):
@@ -421,6 +459,10 @@ counts = {k: sum(1 for p in P if stage_of(p['step']) == k) for k in STAGE}
 ranked_news = sorted(((p, it) for p in P for it in news_of(p['id'])), key=lambda t: dkey(t[1].get('date')), reverse=True)
 
 # ===== 首頁 =====
+GUIDES_HOME = [('/guide/expropriation/', '區段徵收七步驟與三種開發方式', '一塊地最後變成什麼？用 100 格方塊看懂領回比例。'),
+               ('/guide/risk/', '範圍內還是外溢圈？', '六個風險面向與外溢圈示意，找出低基期、高發展性的地。'),
+               ('/guide/tax/', '農地稅負一張圖', '持有、徵收、抵價地、建地四階段的稅負與 5 年列管。'),
+               ('/guide/family-office/', '家族傳承怎麼配置農地', '給代書、會計師與家辦的三層配置與傳承順序。')]
 rows = ''
 for p in sorted(P, key=lambda p: dkey((news_of(p['id']) or [{}])[0].get('date')), reverse=True):
     n = news_of(p['id'])
@@ -447,13 +489,15 @@ home = f"""
 <div class="chips" id="fR" style="margin:12px 0"><button class="chip on" data-v="">全台</button>{''.join(f'<button class="chip" data-v="{r}">{r}</button>' for r in REG)}</div>
 <div class="chips" id="fS" style="margin-bottom:12px"><button class="chip on" data-v="">全部階段</button>{''.join(f'<button class="chip" data-v="{k}">{v}</button>' for k, v in STAGE.items())}</div>
 <div class="cols">
-<div class="scroll"><table class="stack" id="dT"><thead><tr><th>開發案</th><th>階段</th><th>最新消息</th></tr></thead><tbody>{rows}</tbody></table></div>
+<div class="scroll" style="max-height:640px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:0 10px"><table class="stack" id="dT"><thead><tr><th>開發案</th><th>階段</th><th>最新消息</th></tr></thead><tbody>{rows}</tbody></table></div>
 <div class="card"><h3>最新消息</h3>{feed}</div>
 </div>
 </div></section>
 <section class="band"><div class="wrap">
-<h2>全台農地開發案統計圖表</h2>
-<p class="muted">以圖表整理全台 {len(P)} 個區段徵收、特定區與產業園區開發案的區域與階段分布。</p>
+<h2>三分鐘看懂農地開發</h2>
+<p class="muted">相信土地把最常被問的觀念畫成圖解，先看懂再看案子。</p>
+<div class="pgrid" style="margin:14px 0 30px">{''.join(f'<a class="pcard gcard" href="{h}"><span class="gi">{IG.icon_svg(GUIDE_IC[h], 26, '#fff')}</span><h3>{e(t)}</h3><p class="small muted" style="margin:0">{e(d)}</p></a>' for h, t, d in GUIDES_HOME)}</div>
+<h2>全台開發案分布</h2>
 <div class="charts2">{chart_stacked_regions(f'圖：全台各區區段徵收與農地開發案階段分布（{NEWS_AT}）。中部案件最多，開發前階段的案子占多數。')}
 {chart_hbar([(c, sum(1 for p in P if p['county'] == c), SC['mid'] if c == '彰化縣' else '#1d4a33', f'/county/{CSLUG[c]}/') for c in sorted(COUNTIES, key=lambda c: -sum(1 for p in P if p['county'] == c))], '各縣市農地開發案數量', '；'.join(f"{c} {sum(1 for p in P if p['county'] == c)} 案" for c in COUNTIES), '圖：各縣市收錄的區段徵收與特定區開發案數量，點縣市名稱可看該縣市進度。', ' 案', lab=80)}</div>
 </div></section>
@@ -465,15 +509,13 @@ home = f"""
 <h2 style="margin-top:36px">相信土地專欄：最新評估</h2>
 <p class="muted">整理政府公告與新聞，寫給投資者與從業人員的開發評估。<a href="/column/">看全部 {len(COL)} 篇 →</a></p>
 <div class="pgrid" style="margin-top:12px">{''.join(f'<a class="pcard colcard" href="/column/{q["id"]}/">{tag(q)}<h3>{e(COL[q["id"]]["t"])}</h3><p class="k">{e(q["county"])}{e(q["town"])}</p></a>' for q in sorted([q for q in P if q['id'] in COL], key=lambda q: (q['county'] != '彰化縣', -pot(q)['pri']))[:6])}</div>
-<h2 style="margin-top:36px">依縣市查詢</h2>
-<div class="chips" style="margin-top:12px">{''.join(f'<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="/county/{CSLUG[c]}/">{e(c)}（{sum(1 for p in P if p["county"] == c)}）</a>' for c in COUNTIES)}</div>
 </div></section>
 <script>{{const st={{r:'',s:''}};const f=()=>document.querySelectorAll('#dT tbody tr').forEach(t=>t.hidden=!((!st.r||t.dataset.r===st.r)&&(!st.s||t.dataset.s===st.s)));
 for(const [id,k] of [['fR','r'],['fS','s']])document.getElementById(id).addEventListener('click',ev=>{{const b=ev.target.closest('[data-v]');if(!b)return;st[k]=b.dataset.v;b.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));f()}})}}</script>
 """
 write('/', page('/', f'全台農地開發動態儀表板：區段徵收、特定區進度與最新消息｜{BRAND}',
                 f'整理全台 {len(P)} 個區段徵收、特定區與產業園區開發案的進度與每月最新報導，依北中南東區篩選，找出基期低、發展性高的農地投資機會。',
-                home, [ORG, {'@context': 'https://schema.org', '@type': 'WebSite', 'name': BRAND, 'url': SITE + '/'}]), prio='1.0')
+                home, [ORG, {'@context': 'https://schema.org', '@type': 'WebSite', 'name': BRAND, 'url': SITE + '/'}], og=og('home', '全台農地開發動態儀表板', f'{len(P)} 個區段徵收・特定區進度，每月更新')), prio='1.0')
 
 # ===== 開發案總覽 =====
 blocks = ''
@@ -488,16 +530,19 @@ for r, cs in REG.items():
 cb, cld = crumbs([('首頁', '/'), ('開發案總覽', None)])
 write('/projects/', page('/projects/', f'全台區段徵收與農地開發案總覽（{len(P)} 案）｜{BRAND}',
                          '依北、中、南、東區與縣市整理全台區段徵收、特定區、新訂擴大都市計畫與產業園區開發案，附開發階段與最新報導。',
-                         f'<section class="band"><div class="wrap">{cb}<h1>全台農地開發案總覽</h1><p class="lede muted">共 {len(P)} 案。點選開發案可看七步驟進度、重點事實、風險提示與每月最新報導。</p>'
-                         f'<div class="charts2">{chart_stacked_regions("圖：全台各區開發案階段分布。")}{chart_progress(sorted(P, key=lambda p: -p["step"])[:16], "開發進度最快的 16 個開發案", "圖：進度最快的開發案，從都市計畫到發展成熟共七個步驟。")}</div>'
+                         f'<section class="band"><div class="wrap">' + hero(cb, '開發案總覽・每月更新', '全台農地開發案總覽', f'共 {len(P)} 案，依北、中、南、東區與縣市排列。點選開發案可看七步驟進度圖、政府出處、地圖與最新報導。', [(len(P), '開發案'), (counts['pre'], '開發前'), (counts['mid'], '開發中'), (counts['post'], '開發後')])
+                         + IG.ig_steps(STEPS, title='每個開發案都用這七步驟標示進度') +
+                         f'<div class="charts2">{chart_progress(sorted(P, key=lambda p: -p["step"])[:16], "開發進度最快的 16 個開發案", "圖：進度最快的開發案，從都市計畫到發展成熟共七個步驟。")}</div>'
                          f'<div class="cols" style="margin-top:12px"><div>{blocks}</div><div class="mapbox" style="position:sticky;top:90px">{map_svg(P)}{legend()}</div></div></div></section>',
                          [cld, {'@context': 'https://schema.org', '@type': 'Dataset', 'name': '全台區段徵收與農地開發案資料集',
                                 'description': f'整理全台 {len(P)} 個區段徵收、特定區、新訂擴大都市計畫與產業園區開發案的位置、規模、開發階段、重點事實與資料來源，每月更新。',
                                 'url': SITE + '/projects/', 'keywords': ['區段徵收', '農地', '特定區', '都市計畫', '土地開發'], 'inLanguage': 'zh-TW',
                                 'creator': {'@type': 'Organization', 'name': BRAND, 'url': SITE + '/'}, 'dateModified': NEWS_AT or TODAY,
                                 'spatialCoverage': {'@type': 'Place', 'name': '台灣'},
-                                'distribution': [{'@type': 'DataDownload', 'encodingFormat': 'application/json', 'contentUrl': SITE + '/data/projects.json'}]}],
-                         active='/projects/'), prio='0.9')
+                                'distribution': [{'@type': 'DataDownload', 'encodingFormat': 'application/json', 'contentUrl': SITE + '/data/projects.json'}]},
+                          {'@context': 'https://schema.org', '@type': 'ItemList', 'name': '全台農地開發案', 'numberOfItems': len(P),
+                           'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'url': f'{SITE}/project/{p["id"]}/', 'name': p['name']} for i, p in enumerate(P)]}],
+                         active='/projects/', og=og('projects', '全台農地開發案總覽', f'{len(P)} 案・區段徵收・特定區・產業園區')), prio='0.9')
 
 # ===== 縣市頁 =====
 for c in COUNTIES:
@@ -511,9 +556,7 @@ for c in COUNTIES:
     cn_html = ''.join(f'<div class="news"><span class="small muted">{e(it.get("date"))}・{e(it.get("source"))}</span><br><a href="/project/{p["id"]}/">{e(it["title"])}</a></div>' for p, it in lat_news) or '<p class="note">尚無報導。</p>'
     cb, cld = crumbs([('首頁', '/'), ('開發案總覽', '/projects/'), (c, None)])
     names = '、'.join(p['name'] for p in cp[:4])
-    body = (f'<section class="band"><div class="wrap">{cb}<h1>{e(c)}農地開發案：區段徵收與特定區進度</h1>'
-            f'<p class="lede muted">{e(c)}目前收錄 {len(cp)} 個開發案，包括{e(names)}{"等" if len(cp) > 4 else ""}。以下依開發階段整理進度與最新報導，協助評估周邊農地的變更潛力。</p>'
-            f'<div class="kpis"><div><b>{len(cp)}</b><span>開發案</span></div><div><b>{cnt["pre"]}</b><span>開發前</span></div><div><b>{cnt["mid"]}</b><span>開發中</span></div><div><b>{cnt["post"]}</b><span>開發後</span></div></div>'
+    body = (f'<section class="band"><div class="wrap">' + hero(cb, f'{e(region_of(c))}・縣市開發案', f'{c}農地開發案：區段徵收與特定區進度', f'{c}目前收錄 {len(cp)} 個開發案，包括{names}{"等" if len(cp) > 4 else ""}。以下依開發階段整理進度、圖表與最新報導。', [(len(cp), '開發案'), (cnt['pre'], '開發前'), (cnt['mid'], '開發中'), (cnt['post'], '開發後')]) +
             f'<div class="cols"><div><div class="pgrid">{"".join(pcard(p) for p in cp)}</div>'
             f'<h2 style="margin-top:28px">{e(c)}最新開發消息</h2>{cn_html}</div>'
             f'<div class="mapbox">{map_svg(cp, view)}{legend()}</div></div>'
@@ -521,10 +564,11 @@ for c in COUNTIES:
             + chart_progress(sorted(cp, key=lambda p: -p['step']), f'{c}開發案進度圖', f'圖：{c}{len(cp)}個開發案的七步驟進度，顏色代表開發前、開發中與開發後。')
             + chart_scatter(P, f'{c}開發案價格基期與發展性', f'圖：{c}開發案（深色、標名稱）在全台價格基期與發展性矩陣中的位置。', focus=[p['id'] for p in cp])
             + '</div>'
-            f'<div class="card" style="margin-top:24px"><h3>想在{e(c)}找有開發潛力的農地？</h3><p class="muted">告訴我們預算與需求，或委託刊登您的農地。</p><a class="btn acc" href="/submit/?county={quote(c)}">填寫{e(c)}委託表單</a></div>'
-            f'</div></section>')
+            + cta(f'想在{c}找有開發潛力的農地？', '告訴我們預算與需求，或委託刊登您的農地。', f'/submit/?county={quote(c)}')
+            + related([(f'/column/{p["id"]}/', COL[p['id']]['t'], p['name']) for p in cp if p['id'] in COL][:3] + [('/guide/risk/', '範圍內還是外溢圈？', '投資風險六面向')], f'{c}相關專欄與指南')
+            + '</div></section>')
     write(f'/county/{CSLUG[c]}/', page(f'/county/{CSLUG[c]}/', f'{c}區段徵收與農地開發案進度（{len(cp)} 案）｜{BRAND}',
-                                      f'{c}{len(cp)}個區段徵收、特定區與產業園區開發案的最新進度、階段與報導：{names}。', body, [cld], active='/projects/'), prio='0.8')
+                                      f'{c}{len(cp)}個區段徵收、特定區與產業園區開發案的最新進度、階段與報導：{names}。附七步驟進度圖、基期與發展性圖表。', body, [cld], active='/projects/', og=og('county-' + CSLUG[c], f'{c}農地開發案', f'{len(cp)} 案・開發前 {cnt["pre"]}・開發中 {cnt["mid"]}・開發後 {cnt["post"]}')), prio='0.8')
 
 # ===== 開發案頁 =====
 for p in P:
@@ -556,37 +600,32 @@ for p in P:
     near_html = ''.join(f'<p style="margin:6px 0"><a href="/tools/#item-{e(l.get("id"))}">{e(l.get("county"))}{e(l.get("town"))} {e(l.get("area"))} 坪・{e(l.get("price"))} 萬/坪</a> <span class="small muted">距 {d:.1f} km</span></p>' for l, d in near) or '<p class="muted small">目前沒有上架物件。有意出售周邊農地的地主，歡迎委託刊登。</p>'
     intro = f'{p["name"]}位於{p["county"]}{p["town"]}，屬{p["type"]}，規模{p["area"] if p["area"] != "—" else "依計畫書公告"}，目前進度為「{STEPS[p["step"]]}」（{STAGE[s]}）。'
     cb, cld = crumbs([('首頁', '/'), (p['county'], f'/county/{CSLUG[p["county"]]}/'), (p['name'], None)])
-    body = f"""<section class="band"><div class="wrap">{cb}
+    col_link = f'<div class="tldr"><b>相信土地專欄</b>：<a href="/column/{p["id"]}/">{e(COL[p["id"]]["t"])}</a><br><span class="small muted">政府公告怎麼說、新聞透露什麼、我們怎麼看，一篇讀完。</span></div>' if p['id'] in COL else ''
+    body = f"""<section class="band"><div class="wrap">
+{hero(cb, f'{tag(p)} {e(p["type"])}・{e(p["county"])}{e(p["town"])}', p['name'], intro, [(STAGE[s], '開發階段'), (f'{p["step"] + 1}/7', '目前步驟'), (e(p['type']), '開發方式'), (pt['pri'], '佈局優先分數')])}
+{IG.ig_steps(STEPS, p['step'], title=f"{p['name']}開發進度", name=p['name'])}{note}
 <div class="cols"><div>
-{tag(p)} <span class="small muted">{e(p['type'])}・{e(p['county'])}{e(p['town'])}</span>
-<h1 style="margin-top:10px">{e(p['name'])}</h1>
-<p class="lede">{e(intro)}</p>
-<div class="kpis"><div><b>{STAGE[s]}</b><span>開發階段</span></div><div><b>{pt['dev']}</b><span>發展性分數</span></div><div><b>{pt['base']}</b><span>價格基期分數</span></div><div><b>{pt['pri']}</b><span>佈局優先分數</span></div></div>
-<h2>開發進度</h2><div class="track">{track}</div>{note}
-{f'<div class="tldr"><b>相信土地專欄</b>：<a href="/column/{p["id"]}/">{e(COL[p["id"]]["t"])}</a></div>' if p['id'] in COL else ''}
+{col_link}
 <h2>重點事實</h2><ul class="facts">{''.join(f'<li>{e(f)}</li>' for f in p['facts'])}</ul>
-<h2>政府出處</h2>{gov_html}
 {f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
+<h2>政府出處</h2>{gov_html}
 <h2>相關新聞</h2>{news_html(n)}
 <p class="note">新聞每月 1 日自動更新；新聞來源：<a href="{e(safe_url(p['src']))}" target="_blank" rel="nofollow noopener noreferrer">{e(p['srcN'])}</a></p>
 </div><div>
-<div class="mapbox">{map_svg(P, (X(p['lng']) - 45, Y(p['lat']) - 55, 90, 110), highlight=p['id'])}</div>
-<div class="card" style="margin-top:16px"><h3>投資觀點</h3><p><b>{quad}</b></p><p class="muted small">{e(pt['why'])}</p>
-{chart_hbar([('發展性', pt['dev'], SC['post'], None), ('價格基期', pt['base'], SC['mid'], None), ('佈局優先', pt['pri'], '#1d4a33', None)], f"{p['name']}投資潛力分數", f"發展性 {pt['dev']}、價格基期 {pt['base']}、佈局優先 {pt['pri']}（滿分 100）", f"圖：{p['name']}的發展性、價格基期與佈局優先分數。", lab=80)}
-{chart_scatter(P, f"{p['name']}在全台開發案矩陣中的位置", f"圖：{p['name']}（放大的點）在全台價格基期與發展性矩陣中的位置。", highlight=p['id'])}<p class="note">分數為平台依發展動能與區域價格帶的初步判斷，請以實價登錄校正。<a href="/guide/risk/">評估方法</a></p></div>
-<div class="card" style="margin-top:16px"><h3>周邊 5 公里在售農地</h3>{near_html}<div class="chips" style="margin-top:10px"><a class="btn acc" href="/submit/?project={p['id']}&county={quote(p['county'])}">委託刊登 / 我想找地</a><a class="btn" href="/tools/#report">產生潛力報告</a></div></div>
+<div class="card"><h3>相信土地評分</h3>{IG.ig_gauges(p['name'], pt['dev'], pt['base'], pt['pri'])}<p style="margin:10px 0 4px"><b>{quad}</b></p><p class="muted small" style="margin:0">{e(pt['why'])}</p><p class="note">分數為平台初步判斷，請以實價登錄校正。<a href="/guide/risk/">評估方法</a></p></div>
+<div class="card" style="margin-top:16px"><h3>周邊 5 公里在售農地</h3>{near_html}<div class="chips" style="margin-top:10px"><a class="btn acc" href="/submit/?project={p['id']}&county={quote(p['county'])}">委託刊登 / 我想找地</a></div></div>
 {f'<div class="card" style="margin-top:16px"><h3>{e(p["county"])}其他開發案</h3>' + ''.join(f'<p style="margin:6px 0"><a href="/project/{q["id"]}/">{e(q["name"])}</a> <span class="small muted">{STAGE[stage_of(q["step"])]}</span></p>' for q in same) + '</div>' if same else ''}
 </div></div></div></section>
 <section class="band" style="background:var(--soft)"><div class="wrap">
 <h2>{e(p['name'])}位置與政府土地使用分區圖</h2>
-<p class="muted">{e(p['name'])}位於{e(p['county'])}{e(p['town'])}。地圖疊加的是政府圖資：<b>內政部國土測繪中心「非都市土地使用分區圖」</b>（有顏色的是農業區、鄉村區等非都市土地，<b>沒有上色的空白區塊就是既有都市計畫區</b>）與<b>地段界線（段籍圖）</b>{'，以及<b>嘉義市政府都市計畫使用分區圖</b>' if p['county'] == '嘉義市' else ''}。新訂、擴大中的計畫還沒公告，地圖上不會出現新的範圍線，<b>正式範圍請看右側「官方計畫範圍」的計畫書圖</b>。藍色標記為計畫位置參考點，不代表範圍。</p>
+<p class="muted">底圖為內政部國土測繪中心的<b>非都市土地使用分區圖</b>與<b>段籍圖</b>{'，並疊加<b>嘉義市政府都市計畫使用分區圖</b>' if p['county'] == '嘉義市' else ''}：有顏色的是非都市土地，<b>空白區塊是既有都市計畫區</b>。新訂、擴大中的計畫尚未公告，正式範圍請以上方「政府出處」的計畫書圖為準；藍色標記只是位置參考點。</p>
 <div class="cols" style="margin-top:14px"><div id="pmap" data-lat="{p['lat']}" data-lng="{p['lng']}" data-cyc="{1 if p['county'] == '嘉義市' else 0}" data-name="{e(p['name'])}" data-amen="{e(json.dumps(amen_pts, ensure_ascii=False, separators=(',', ':')))}" role="region" aria-label="{e(p['name'])}位置與政府土地使用分區圖"></div>
 <div class="card"><h3>周邊生活機能</h3><div id="pmapList">{amen_html}</div>
-<h3 style="margin-top:16px">官方計畫範圍（政府出處）</h3>{gov_html}
 <h3 style="margin-top:16px">自行查詢地號分區</h3><ul class="facts small">
-<li><a href="https://luz.tcd.gov.tw/web/" target="_blank" rel="noopener">全國土地使用分區資料查詢系統</a>（內政部國土管理署）：輸入地段地號，可查都市計畫使用分區與非都市土地使用分區</li>
-<li><a href="https://maps.nlsc.gov.tw/" target="_blank" rel="noopener">國土測繪圖資服務雲</a>（內政部國土測繪中心）：可疊加地籍、都市計畫與非都市分區圖層</li>
+<li><a href="https://luz.tcd.gov.tw/web/" target="_blank" rel="noopener">全國土地使用分區資料查詢系統</a>（內政部國土管理署）</li>
+<li><a href="https://maps.nlsc.gov.tw/" target="_blank" rel="noopener">國土測繪圖資服務雲</a>（內政部國土測繪中心）</li>
 <li><a href="https://nsp.tcd.gov.tw/tcdgis/" target="_blank" rel="noopener">國土規劃地理資訊圖台</a>：國土功能分區與環境敏感地區</li></ul></div></div>
+{related(([(f'/column/{p["id"]}/', COL[p['id']]['t'], '相信土地專欄')] if p['id'] in COL else []) + [('/guide/expropriation/', '區段徵收七步驟與三種開發方式', '圖解領回比例'), ('/guide/risk/', '範圍內還是外溢圈？', '投資風險六面向')])}
 </div></section>"""
     desc = f'{p["name"]}（{p["county"]}{p["town"]}）最新進度：{STEPS[p["step"]]}。{p["facts"][0]}。附每月相關新聞、風險提示與周邊農地投資觀點。'
     ld = {'@context': 'https://schema.org', '@type': 'WebPage', 'name': p['name'], 'description': desc, 'url': f'{SITE}/project/{p["id"]}/',
@@ -594,7 +633,7 @@ for p in P:
           'about': {'@type': 'Place', 'name': p['name'], 'address': {'@type': 'PostalAddress', 'addressRegion': p['county'], 'addressLocality': p['town'], 'addressCountry': 'TW'},
                     'geo': {'@type': 'GeoCoordinates', 'latitude': p['lat'], 'longitude': p['lng']}}}
     write(f'/project/{p["id"]}/', page(f'/project/{p["id"]}/', f'{p["name"]}進度與最新消息｜{p["county"]}{p["town"]}｜{BRAND}', desc[:150], body, [cld, ld],
-                                      active='/projects/', og_type='article', head_extra=LEAF), lastmod=(NEWS.get(p['id'], {}).get('updatedAt') or NEWS_AT), prio='0.8')
+                                      active='/projects/', og_type='article', head_extra=LEAF, og=og('p-' + p['id'], p['name'], f"{p['county']}{p['town']}・{p['type']}・{STEPS[p['step']]}", SC[s])), lastmod=(NEWS.get(p['id'], {}).get('updatedAt') or NEWS_AT), prio='0.8')
 
 
 # ===== 相信土地專欄 =====
@@ -605,7 +644,6 @@ def column_page(p, c):
     upd = NEWS.get(p['id'], {}).get('updatedAt') or NEWS_AT or TODAY
     gl = GOV.get(p['id'], [])
     n = news_of(p['id'])
-    track = ''.join(f'<div class="{"done" if i < p["step"] else "now" if i == p["step"] else ""}">{t}</div>' for i, t in enumerate(STEPS))
     tbl = (f'<div class="scroll"><table><tbody>'
            f'<tr><th scope="row">計畫名稱</th><td><a href="/project/{p["id"]}/">{e(p["name"])}</a></td></tr>'
            f'<tr><th scope="row">位置</th><td>{e(p["county"])}{e(p["town"])}</td></tr>'
@@ -620,15 +658,14 @@ def column_page(p, c):
     gov = ''.join(f'<li><a href="{e(safe_url(g["u"]))}" target="_blank" rel="noopener">{e(g["t"])}</a> <span class="small muted">— {e(g["o"])}</span></li>' for g in gl)
     nws = ''.join(f'<li>{e(it.get("date", ""))}・{e(it.get("source", ""))}：<a href="{e(safe_url(it.get("url", "")))}" target="_blank" rel="nofollow noopener noreferrer">{e(it.get("title", ""))}</a></li>' for it in n[:6])
     same = [q for q in P if q['county'] == p['county'] and q['id'] != p['id'] and q['id'] in COL]
-    rel = ''.join(f'<li><a href="/column/{q["id"]}/">{e(COL[q["id"]]["t"])}</a></li>' for q in same[:5])
     cb, cld = crumbs([('首頁', '/'), ('相信土地專欄', '/column/'), (p['county'], f'/county/{CSLUG[p["county"]]}/'), (p['name'], None)])
-    body = f"""<section class="band"><div class="wrap article">{cb}
-{tag(p)} <span class="colmeta">相信土地專欄・{e(p['county'])}{e(p['town'])}・資料更新 {e(upd)}</span>
-<h1 style="margin-top:10px">{e(c['t'])}</h1>
-<p class="lede muted">{e(c['d'])}</p>
+    xs, ys = X(p['lng']), Y(p['lat'])
+    loc = (f'<figure class="ig locator"><div class="ig-h"><span class="ig-b">相信土地圖解</span><b>{e(p["name"])}在哪裡</b></div><div class="mapbox">{map_svg(P, (xs - 30, ys - 30, 60, 60), highlight=p["id"])}</div>'
+           f'<figcaption>{e(p["county"])}{e(p["town"])}，目前在七步驟中的第 {p["step"] + 1} 步「{e(STEPS[p["step"]])}」。<a href="/project/{p["id"]}/">看完整進度圖與政府分區地圖 →</a></figcaption></figure>')
+    body = f"""<section class="band"><div class="wrap article">
+{hero(cb, f'{tag(p)} 相信土地專欄・{e(p["county"])}{e(p["town"])}・資料更新 {e(upd)}', c['t'], c['d'])}
 <div class="tldr"><b>重點摘要</b><ul>{''.join(f'<li>{e(x)}</li>' for x in c['k'])}</ul></div>
-{tbl}
-<h2>開發進度</h2><div class="track">{track}</div>
+<div class="cols colhead"><div>{tbl}</div>{loc}</div>
 {secs}
 <h2>給從業人員的評估清單</h2><ol>{pro}</ol>
 {f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
@@ -636,21 +673,21 @@ def column_page(p, c):
 <h2>資料來源</h2>
 <h3 style="font-size:17px">政府出處</h3><ul class="small">{gov or '<li>整理中</li>'}</ul>
 {f'<h3 style="font-size:17px">新聞報導</h3><ul class="small">{nws}</ul>' if nws else ''}
-<div class="chips" style="margin-top:18px"><a class="btn acc" href="/project/{p['id']}/">看{e(p['name'])}進度、地圖與分區</a><a class="btn" href="/submit/?project={p['id']}&county={quote(p['county'])}">委託刊登 / 我想找地</a></div>
-{f'<h2>{e(p["county"])}其他專欄</h2><ul>{rel}</ul>' if rel else ''}
+{cta(f'想找{p["name"]}周邊的農地？', '委託刊登或告訴我們預算，由相信土地協助評估。', f'/submit/?project={p["id"]}&county={quote(p["county"])}')}
+{related([(f'/column/{q["id"]}/', COL[q['id']]['t'], q['name']) for q in same[:3]] + [(f'/project/{p["id"]}/', f'{p["name"]}進度與地圖', '七步驟進度圖・政府分區地圖・最新新聞')], f'{p["county"]}其他專欄')}
 <p class="byline">本文由{e(BRAND)}依政府公開資料與新聞報導整理撰寫，內容以撰寫時點為準，非投資建議；範圍、分區與時程請以主管機關公告為準。{broker_line()}</p>
 </div></section>"""
     cites = [g['u'] for g in gl] + [it.get('url') for it in n[:6] if it.get('url')]
     ld = {'@context': 'https://schema.org', '@type': 'Article', 'headline': c['t'], 'description': c['d'], 'inLanguage': 'zh-TW',
           'datePublished': COL_PUB, 'dateModified': max(upd, COL_PUB), 'author': {'@type': 'Organization', 'name': BRAND, 'url': SITE + '/'},
-          'publisher': {'@type': 'Organization', 'name': BRAND, 'logo': {'@type': 'ImageObject', 'url': SITE + '/og.png'}},
-          'mainEntityOfPage': SITE + path, 'image': SITE + '/og.png', 'articleSection': '相信土地專欄',
+          'publisher': {'@type': 'Organization', 'name': BRAND, 'logo': {'@type': 'ImageObject', 'url': SITE + '/assets/favicon.svg'}},
+          'mainEntityOfPage': SITE + path, 'image': f'{SITE}/assets/og/c-{p["id"]}.png', 'articleSection': '相信土地專欄',
           'keywords': ', '.join([p['name'], p['county'] + p['town'], p['type'], '區段徵收', '農地投資', '開發評估']),
           'about': {'@type': 'Place', 'name': p['name'], 'geo': {'@type': 'GeoCoordinates', 'latitude': p['lat'], 'longitude': p['lng']},
                     'address': {'@type': 'PostalAddress', 'addressRegion': p['county'], 'addressLocality': p['town'], 'addressCountry': 'TW'}},
           'citation': cites, 'abstract': ' '.join(c['k'])}
     fq = {'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in c['faq']]}
-    write(path, page(path, f'{c["t"]}｜{BRAND}專欄', c['d'][:150], body, [cld, ld, fq], active='/column/', og_type='article'), lastmod=max(upd, COL_PUB), prio='0.8')
+    write(path, page(path, f'{c["t"]}｜{BRAND}專欄', c['d'][:150], body, [cld, ld, fq], active='/column/', og_type='article', og=og('c-' + p['id'], c['t'], f"相信土地專欄・{p['county']}{p['town']}", SC[s_])), lastmod=max(upd, COL_PUB), prio='0.8')
 
 
 for p in P:
@@ -665,30 +702,34 @@ for r, cs in REG.items():
 cb, cld = crumbs([('首頁', '/'), ('相信土地專欄', None)])
 cdesc = f'相信土地專欄：依各縣市政府公告與新聞，逐案評估全台 {len(COL)} 個區段徵收、特定區與產業園區的進度、價格與風險，給農地投資者與不動產從業人員參考。'
 write('/column/', page('/column/', f'相信土地專欄：全台區段徵收與農地開發評估｜{BRAND}', cdesc,
-      f'<section class="band"><div class="wrap">{cb}<h1>相信土地專欄</h1><p class="lede muted">{e(cdesc)}</p>'
+      f'<section class="band"><div class="wrap">' + hero(cb, '專欄・逐案評估', '相信土地專欄', cdesc, [(len(COL), '篇評估'), (len(REG), '個區域'), (COL_PUB, '最近撰寫')]) +
       f'<div class="tldr"><b>怎麼讀這些文章</b><ul><li>每篇都先列「重點摘要」，再分「官方怎麼說」「新聞透露什麼」「相信土地怎麼看」。</li><li>文末附政府出處與新聞連結，可以自行查證。</li><li>「給從業人員的評估清單」整理帶看與簽約前要確認的事項。</li></ul></div>{blocks}</div></section>',
       [cld, {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': '相信土地專欄', 'description': cdesc, 'url': SITE + '/column/',
              'hasPart': [{'@type': 'Article', 'headline': COL[p['id']]['t'], 'url': f'{SITE}/column/{p["id"]}/'} for p in P if p['id'] in COL]}],
-      active='/column/'), prio='0.9')
+      active='/column/', og=og('column', '相信土地專欄', f'{len(COL)} 篇區段徵收與農地開發評估')), prio='0.9')
 
 # ===== 投資指南 =====
 GUIDES = [('/guide/expropriation/', '區段徵收、市地重劃、農地重劃差在哪？', '一次看懂三種土地開發方式的法源、領回比例、增值空間與風險，以及區段徵收的七個步驟。'),
-          ('/guide/risk/', '農地投資風險評估與長期佈局策略', '六個面向評估開發題材農地的風險，並依低基期、高發展性排序全台優先佈局的開發案。'),
-          ('/guide/tax/', '農地節稅重點：土增稅、遺產贈與稅與農舍', '作農業使用的農地可享哪些稅負優惠？區段徵收領回抵價地如何減徵土地增值稅？'),
+          ('/guide/risk/', '農地投資風險評估與長期佈局策略', '六個面向評估開發題材農地的風險，用外溢圈圖解範圍內外差異，並依低基期、高發展性排序全台優先佈局的開發案。'),
+          ('/guide/tax/', '農地稅負一張圖：土增稅、遺產贈與稅與 5 年列管', '持有、被徵收、領回抵價地、變更為建地四個階段的稅負，以及遺贈稅級距與 5 年列管圖解。'),
           ('/guide/family-office/', '家族辦公室與資產傳承：高資產客戶的農地長期佈局', '寫給代書、會計師、財務顧問與家族辦公室：農地在傳承配置中的角色、持有結構、稅負時間軸、贈與與繼承順序，以及 2026 年特留分修法後的遺囑安排。')]
 cb, cld = crumbs([('首頁', '/'), ('投資指南', None)])
-write('/guide/', page('/guide/', f'農地投資指南｜{BRAND}', '區段徵收與重劃比較、投資風險評估、長期佈局策略與農地節稅重點。',
-                      f'<section class="band"><div class="wrap">{cb}<h1>農地投資指南</h1><div class="pgrid" style="margin-top:16px">' +
-                      ''.join(f'<a class="pcard" href="{h}"><h3>{e(t)}</h3><p class="muted small">{e(d)}</p></a>' for h, t, d in GUIDES) + '</div></div></section>',
-                      [cld], active='/guide/'), prio='0.7')
+write('/guide/', page('/guide/', f'農地投資指南：區段徵收、風險、稅負與傳承圖解｜{BRAND}', '用相信土地圖解看懂區段徵收七步驟、三種開發方式、外溢圈、農地稅負時間軸、5 年列管與家族傳承配置。',
+                      f'<section class="band"><div class="wrap">' + hero(cb, '投資指南・圖解', '農地投資指南', '四篇圖解，從開發方式、風險、稅負到家族傳承，先看懂觀念再看案子。') + '<div class="pgrid" style="margin-top:16px">' +
+                      ''.join(f'<a class="pcard gcard" href="{h}"><span class="gi">{IG.icon_svg(GUIDE_IC[h], 26, "#fff")}</span><h3>{e(t)}</h3><p class="muted small" style="margin:0">{e(d)}</p></a>' for h, t, d in GUIDES) + '</div></div></section>',
+                      [cld], active='/guide/', og=og('guide', '農地投資指南', '區段徵收・風險・稅負・傳承圖解')), prio='0.7')
 
 
-def article(path, title, desc, inner, extra_ld=None):
+def article(path, title, desc, inner, extra_ld=None, tldr=None):
     cb, cld = crumbs([('首頁', '/'), ('投資指南', '/guide/'), (title, None)])
-    ld = {'@context': 'https://schema.org', '@type': 'Article', 'headline': title, 'description': desc, 'inLanguage': 'zh-TW',
-          'dateModified': NEWS_AT or TODAY, 'author': {'@type': 'Organization', 'name': BRAND}, 'publisher': {'@type': 'Organization', 'name': BRAND}, 'mainEntityOfPage': SITE + path}
-    write(path, page(path, f'{title}｜{BRAND}', desc, f'<section class="band"><div class="wrap article">{cb}<h1>{e(title)}</h1><p class="lede muted">{e(desc)}</p>{inner}</div></section>',
-                     [cld, ld] + (extra_ld or []), active='/guide/', og_type='article'), prio='0.7')
+    slug = 'g-' + path.strip('/').split('/')[-1]
+    ld = {'@context': 'https://schema.org', '@type': 'Article', 'headline': title, 'description': desc, 'inLanguage': 'zh-TW', 'image': f'{SITE}/assets/og/{slug}.png',
+          'datePublished': '2026-11-20', 'dateModified': NEWS_AT or TODAY, 'author': {'@type': 'Organization', 'name': BRAND, 'url': SITE + '/'}, 'publisher': {'@type': 'Organization', 'name': BRAND}, 'mainEntityOfPage': SITE + path}
+    tl = f'<div class="tldr"><b>重點摘要</b><ul>{"".join(f"<li>{x}</li>" for x in tldr)}</ul></div>' if tldr else ''
+    rel = related([(h, t, d) for h, t, d in GUIDES if h != path], '其他圖解指南')
+    write(path, page(path, f'{title}｜{BRAND}', desc[:155], f'<section class="band"><div class="wrap article">' + hero(cb, '投資指南・相信土地圖解', title, desc) + tl + inner
+                     + cta('想評估手上的農地？', '告訴我們地段地號，相信土地協助查分區、範圍與行情。', '/submit/') + rel + '</div></section>',
+                     [cld, ld] + (extra_ld or []), active='/guide/', og_type='article', og=og(slug, title, '相信土地圖解・投資指南')), prio='0.7')
 
 
 FAQ = [('區段徵收可以領回多少土地？', '抵價地總面積以徵收總面積 50% 為原則，不得少於 40%；曾經農地重劃者不得少於 45%。實際比例以內政部核定為準。'),
@@ -696,6 +737,8 @@ FAQ = [('區段徵收可以領回多少土地？', '抵價地總面積以徵收�
        ('不想領回土地可以嗎？', '可以選擇領取現金補償，補償按徵收當期市價計算。'),
        ('區段徵收領回抵價地要繳土地增值稅嗎？', '被區段徵收的土地免徵土地增值稅；領回抵價地後第一次移轉，土地增值稅減徵 40%。')]
 article('/guide/expropriation/', '區段徵收、市地重劃、農地重劃差在哪？', GUIDES[0][2], f"""
+{IG.ig_land_split()}
+<h2>三種開發方式比較表</h2>
 <div class="scroll"><table><thead><tr><th></th><th>區段徵收</th><th>市地重劃</th><th>農地重劃</th></tr></thead><tbody>
 <tr><td><b>法源</b></td><td>土地徵收條例</td><td>平均地權條例</td><td>農地重劃條例</td></tr>
 <tr><td><b>土地所有權</b></td><td>先全部徵收，再發還一部分</td><td>不移轉，重新分配位置</td><td>不移轉，重新分配位置</td></tr>
@@ -704,10 +747,10 @@ article('/guide/expropriation/', '區段徵收、市地重劃、農地重劃差�
 <tr><td><b>使用分區變化</b></td><td>農地 → 住宅、商業、產業用地</td><td>多已是都市土地</td><td>仍為農地</td></tr>
 <tr><td><b>增值空間</b></td><td>最大（地目變更）</td><td>中等（公設完善）</td><td>小</td></tr>
 <tr><td><b>主要風險</b></td><td>期程長、爭議訴訟、配地位置</td><td>期程、負擔比例</td><td>變現性受農地限制</td></tr></tbody></table></div>
-<h2>區段徵收的七個步驟</h2><ol>{''.join(f'<li>{t}</li>' for t in STEPS)}</ol>
+<h2>區段徵收的七個步驟</h2>{IG.ig_steps(STEPS, caption='本站每個開發案頁都用這張圖標示目前進度。')}
 <p>本站每個開發案頁面都用這七個步驟標示目前進度，例如 <a href="/project/chhsr/">高鐵彰化車站特定區</a> 已進入發展成熟階段，<a href="/project/nanke/">南科特定區開發區塊</a> 正在補償與抵價地申請階段。</p>
 <h2>常見問題</h2>{''.join(f'<h3>{e(q)}</h3><p>{e(a)}</p>' for q, a in FAQ)}
-<p class="note">比例數字為法規原則，實際以內政部核定與各案公告為準。</p>""",
+<p class="note">比例數字為法規原則，實際以內政部核定與各案公告為準。</p>""", tldr=['區段徵收會把農地變更為建地，地主領回 40–50% 抵價地，增值空間最大、期程最長。', '市地重劃不移轉所有權，扣除負擔後領回建築用地；農地重劃仍是農地。', '每個開發案都用同一張七步驟圖標示進度，越後面價格越已反映。'], extra_ld=
         [{'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in FAQ]}])
 
 RISKS = [('開發確定性', '計畫會不會真的做？', ['是否已通過都委會、內政部土徵小組（公益性與必要性）', '環評是否通過、有無被退回或要求補正', '地主同意比例（常見門檻：回收 6 成、同意 7 成）', '是否有行政訴訟或自救會抗爭'], '二林精機園區環評 12 年仍「補正後再審」；台中大里夏田地主同意約 56%，未達門檻。'),
@@ -718,9 +761,8 @@ RISKS = [('開發確定性', '計畫會不會真的做？', ['是否已通過都
          ('流動性與融資', '想賣時賣不賣得掉？', ['農地貸款成數較低', '大面積總價高，買方族群少', '無臨路、畸零地轉手困難', '先想好接手的人是誰'], '總價上億的土地，買方多半只剩開發商或法人。')]
 rank = sorted(P, key=lambda p: pot(p)['pri'], reverse=True)
 article('/guide/risk/', '農地投資風險評估與長期佈局策略', GUIDES[1][2], f"""
-<h2>六個面向評估投資風險</h2><div class="grid2">{''.join(f'<div class="card risk-card"><h3>{i + 1}. {t}</h3><p class="muted" style="margin:0">{q}</p><ul>{"".join(f"<li>{x}</li>" for x in l)}</ul><div class="ex"><b>案例：</b>{ex}</div></div>' for i, (t, q, l, ex) in enumerate(RISKS))}</div>
+<h2>六個面向評估投資風險</h2>{IG.ig_risk6(RISKS)}<div class="grid2">{''.join(f'<div class="card risk-card"><h3>{i + 1}. {t}</h3><p class="muted" style="margin:0">{q}</p><ul>{"".join(f"<li>{x}</li>" for x in l)}</ul><div class="ex"><b>案例：</b>{ex}</div></div>' for i, (t, q, l, ex) in enumerate(RISKS))}</div>
 <h2>低基期 × 高發展性排行</h2>
-{chart_scatter(P, '全台開發案價格基期與發展性矩陣', '圖：全台開發案依價格基期（橫軸）與發展性（縱軸）分布，左上角為優先長期佈局區，標示前 7 名。', label_n=7, w=640, h=460)}
 {chart_hbar([(re.sub(r'（.*?）', '', p['name'])[:11], pot(p)['pri'], SC[stage_of(p['step'])], f"/project/{p['id']}/") for p in rank[:10]], '佈局優先分數前 10 名開發案', '；'.join(f"{p['name']} {pot(p)['pri']} 分" for p in rank[:10]), '圖：佈局優先分數前 10 名（發展性 60%＋低基期 40%），顏色代表開發階段。', ' 分', w=560, lab=190)}
 <p>排序分數＝發展性 60%＋低基期 40%。發展性＝帶動力道（產業、交通、人口）＋開發確定性－風險扣分；價格基期＝區域價格帶＋進度（越後期價格越已反映）。等級為平台初步判斷，請以實價登錄校正。</p>
 <div class="scroll"><table class="stack"><thead><tr><th>排名</th><th>開發案</th><th>發展性</th><th>基期</th><th>優先分數</th><th>判斷依據</th></tr></thead><tbody>
@@ -728,22 +770,29 @@ article('/guide/risk/', '農地投資風險評估與長期佈局策略', GUIDES[
 </tbody></table></div>
 <h2>長期佈局的六個做法</h2>
 <h3>1. 選「早期＋強動能」</h3><p>開發前、但背後有科學園區、高鐵或國家重大建設撐腰的案子，增值空間最大。</p>
-<h3>2. 範圍外 1–3 公里卡位</h3><p>範圍內的地只能領回 4–5 成抵價地；範圍外的外溢圈保留全部持分，又能吃到道路與人口紅利。</p>
+<h3>2. 範圍外 1–3 公里卡位</h3><p>範圍內的地只能領回 4–5 成抵價地；範圍外的外溢圈保留全部持分，又能吃到道路與人口紅利。</p>{IG.ig_ring()}
 <h3>3. 挑容易變更的地</h3><p>都市計畫農業區、一般農業區優先，特定農業區最難變更；單獨所有、臨 6 米以上道路、方整的地最好賣。</p>
 <h3>4. 分批進場</h3><p>依開發里程碑分段加碼：都委會通過、土徵小組通過、徵收公告、工程開工。</p>
 <h3>5. 用農業使用壓低持有成本</h3><p>持續作農業使用可適用田賦停徵、移轉免土增稅等優惠；資金以自有為主。</p>
 <h3>6. 先想好出場點</h3><p>徵收公告前後、公共工程完工、配地後建地行情確立，是三個常見出場點。</p>
-<p class="note">以上為一般性分析架構，非投資建議。</p>""")
+<p class="note">以上為一般性分析架構，非投資建議。全台開發案的基期與發展性矩陣，請見<a href="/">首頁儀表板</a>。</p>""", tldr=['先看六件事：開發確定性、期程資金、範圍分配、產權法規、價格基期、流動性。', '範圍外 1–3 公里的外溢圈，保有全部面積又能分享路網與人口紅利。', '佈局優先分數＝發展性 60%＋低基期 40%，排行每月隨新聞更新。'])
 
-article('/guide/tax/', '農地節稅重點：土增稅、遺產贈與稅與農舍', GUIDES[2][2], """
-<p>農地的稅負優惠，前提幾乎都是「作農業使用」，並取得農業用地作農業使用證明書。以下為法規原則，個案請洽地政士或會計師。</p>
-<h2>土地增值稅</h2><p>作農業使用的農業用地，移轉給自然人時可申請不課徵土地增值稅（土地稅法第 39 條之 2）。日後再移轉，以前次不課徵時的現值為原地價。</p>
-<h2>遺產稅與贈與稅</h2><p>繼承或贈與作農業使用的農業用地，價值可自遺產或贈與總額中扣除；承受人需繼續作農業使用滿 5 年，否則追繳。</p>
-<h2>地價稅與田賦</h2><p>作農業使用的農業用地課徵田賦而非地價稅，目前田賦停徵，持有成本相對低。</p>
-<h2>區段徵收時</h2><p>被區段徵收的土地免徵土地增值稅；領回抵價地後第一次移轉，土地增值稅減徵 40%（土地徵收條例第 47 條）。</p>
-<h2>興建農舍</h2><p>一般須取得農地滿 2 年、面積達 0.25 公頃以上，且本人無自用住宅等條件（農業用地興建農舍辦法），各縣市另有規定。</p>
-<h2>投資提醒</h2><p>持分農地、違規使用（鐵皮、填土）會讓證明書申請不過，等於失去節稅優惠，購買前務必現勘。</p>""")
-
+article('/guide/tax/', '農地稅負一張圖：土增稅、遺產贈與稅與 5 年列管', GUIDES[2][2], f"""
+<p>農地的稅負優惠，前提幾乎都是「作農業使用」並取得<b>農業用地作農業使用證明書</b>。同一塊地在持有、被徵收、領回抵價地、變更為建地四個階段，適用的規則完全不同：</p>
+{IG.ig_tax_flow()}
+<h2>遺產稅與贈與稅</h2>
+{IG.ig_brackets()}
+<p>作農業使用的農業用地，繼承或贈與民法第 1138 條所定繼承人時，土地與地上農作物價值可全數扣除，但承受人要繼續農用 5 年。</p>
+<h2>5 年列管：什麼情況會被追繳</h2>
+{IG.ig_lock5()}
+<h2>土地增值稅與房地合一稅</h2>
+<p>作農業使用的農業用地移轉給<b>自然人</b>，可申請不課徵土地增值稅；即使稅額為 0 元也要提出申請。105 年後取得、符合不課徵土增稅要件的農地，出售時免納房地合一稅。賣給公司法人則兩項都不適用。</p>
+<h2>區段徵收時</h2>
+<p>被區段徵收的土地免徵土地增值稅；領回抵價地後第一次移轉，土地增值稅減徵 40%。</p>
+<h2>農舍與違規使用</h2>
+<p>農舍不適用農地的稅負優惠，出售時房屋部分併入綜合所得稅。鐵皮、填土、阻斷灌排或堆放雜物，會讓證明書申請不過，等於失去所有優惠，購買前務必現勘。</p>
+<p class="note">以上為法規原則與 2026 年數字，個案請洽地政士或會計師；免稅額以財政部公告為準。高資產家族的傳承順序請見<a href="/guide/family-office/">家族辦公室與資產傳承</a>。</p>""",
+        tldr=['四個階段四套規則：農用持有、被徵收、領回抵價地、變更為建地。', '農用優惠的入場券是「農業用地作農業使用證明書」，而且要移轉給自然人。', '免稅繼承或受贈的農地列管 5 年，轉給自己的子女可能被追繳。'])
 
 # ----- 家族辦公室與資產傳承 -----
 def _tier(stg, n=4):
@@ -758,12 +807,6 @@ FO_FAQ = [('高資產客戶可以用公司名義買農地嗎？', '依農業發�
           ('2027 年遺產稅、贈與稅免稅額會調高嗎？', '物價累計漲幅已超過 10% 法定門檻，媒體依目前漲幅估算明年遺產稅免稅額約 1,492 萬元、贈與稅約 273 萬元，實際以財政部公告為準。贈與時點可視公告結果調整。')]
 
 article('/guide/family-office/', '家族辦公室與資產傳承：高資產客戶的農地長期佈局', GUIDES[3][2], f"""
-<div class="tldr"><b>重點摘要</b><ul>
-<li>農地在傳承配置裡同時扮演三個角色：<b>稅負緩衝</b>（農用可扣除遺產、贈與）、<b>長期增值</b>（區段徵收、特定區變更）、<b>實物保值</b>。三者的條件互相衝突，順序排錯就會失去優惠。</li>
-<li>關鍵分界線是「是否仍為農業用地並作農業使用」。變更為建地前，用農用優惠傳承；變更後，改用抵價地減徵、分年贈與與遺囑安排。</li>
-<li>持有主體以<b>自然人</b>為主：私法人原則上不得承受耕地，賣給公司也會同時失去土增稅與房地合一的免稅。</li>
-<li>每一次免稅傳承都帶著 <b>5 年列管</b>。家族要排的不是「給誰」，而是「什麼時候、在什麼狀態下給誰」。</li>
-</ul></div>
 
 <p>這篇寫給經營家族辦公室、做資產傳承規劃的從業人員：地政士（代書）、會計師、律師、財務顧問與保險規劃師。我們從農地仲介的現場經驗出發，把散在各法規裡的條件串成一條時間軸，方便您與高資產客戶討論「農地要放多少、放哪裡、用誰的名字、何時移轉」。以下為一般性分析架構，個案請由專業人員依最新法令與事實判斷。</p>
 
@@ -776,12 +819,8 @@ article('/guide/family-office/', '家族辦公室與資產傳承：高資產客�
 
 <h2>二、依開發階段分三層配置</h2>
 <p>本站把 45 個開發案依進度分為開發前、開發中、開發後。對傳承規劃而言，三個階段對應的是不同的稅負狀態與風險：</p>
-<div class="grid2">
-<div class="card"><h3>第一層・開發前（長線卡位）</h3><p>仍是農地、可完整享受農用傳承優惠，基期最低，但確定性最低、期程最長。適合由<b>年輕一代持有</b>，用分年贈與或農地贈與先移轉，讓增值發生在下一代名下。</p><p class="small muted">參考：{_tier('pre')}</p></div>
-<div class="card"><h3>第二層・開發中（等待轉換）</h3><p>已進入審議、徵收或抵價地申請。被區段徵收的土地免徵土增稅，領回抵價地第一次移轉減徵 40%。要特別注意：計畫推進中仍須維持農用，否則可能在變更前就被追繳。</p><p class="small muted">參考：{_tier('mid')}</p></div>
-<div class="card"><h3>第三層・開發後（收成與分配）</h3><p>已是建地或配地完成，農用優惠不再適用，改以一般遺產、贈與稅與房地合一處理。優點是價值明確、好分配，適合用來<b>平衡繼承人間的分配</b>或準備稅源。</p><p class="small muted">參考：{_tier('post')}</p></div>
-<div class="card"><h3>外溢圈（範圍外 1–3 公里）</h3><p>不會被徵收、保有全部面積，又能享受路網與人口紅利，同時維持農地身分。對傳承而言，這是「優惠與增值兼得」最常見的位置。</p><p class="small muted">用各開發案頁面的地圖與段籍圖確認範圍線。</p></div>
-</div>
+{IG.ig_tiers({'pre': _tier('pre'), 'mid': _tier('mid'), 'post': _tier('post')})}
+<p>第四個位置是<b>範圍外 1–3 公里的外溢圈</b>：不會被徵收、保有全部面積，又仍是農地，是「優惠與增值兼得」最常見的位置，示意圖見<a href="/guide/risk/">投資風險與外溢圈</a>。</p>
 <p>每個開發案的發展性、基期與佈局分數，請見 <a href="/guide/risk/">投資風險與長期佈局</a>；個案深度評估請見 <a href="/column/">相信土地專欄</a>。</p>
 
 <h2>三、持有結構：誰的名字最合適？</h2>
@@ -794,14 +833,7 @@ article('/guide/family-office/', '家族辦公室與資產傳承：高資產客�
 <p>共有農地有一個常被忽略的好處：繼承後辦理分別共有登記，若有人在 5 年內賣掉自己的持分，只要能提出面積相當的有效分管契約，僅就移轉的那部分補稅，不會拖累其他手足。</p>
 
 <h2>四、稅負時間軸：同一塊地，不同階段不同規則</h2>
-<div class="scroll"><table><thead><tr><th>階段</th><th>遺產／贈與稅</th><th>土地增值稅</th><th>出售所得稅</th></tr></thead><tbody>
-<tr><td><b>農地・作農業使用</b></td><td>贈與繼承人或繼承時可全數扣除，列管 5 年</td><td>移轉給自然人可申請不課徵（即使稅額 0 元也要申請）</td><td>105 年後取得者，符合不課徵土增稅要件免納房地合一稅</td></tr>
-<tr><td><b>被區段徵收時</b></td><td>列管期間內因徵收而未續農用，不追繳</td><td>免徵</td><td>被徵收土地免納房地合一稅</td></tr>
-<tr><td><b>領回抵價地</b></td><td>依一般規定，以公告土地現值計算</td><td>第一次移轉減徵 40%</td><td>依房地合一規定</td></tr>
-<tr><td><b>變更為建地後</b></td><td>依一般規定</td><td>依一般規定</td><td>依房地合一規定</td></tr>
-<tr><td><b>農舍</b></td><td>不適用農地優惠</td><td>—</td><td>房屋部分併入綜合所得稅</td></tr></tbody></table></div>
-<p>2026 年（115 年）遺產稅免稅額 1,333 萬元、贈與稅每位贈與人每年 244 萬元；稅率 10%、15%、20%，級距上限分別為 2,811 萬元與 5,621 萬元。物價累計漲幅已逾調整門檻，2027 年的新額度以財政部公告為準。</p>
-
+<p>對傳承規劃最重要的分界線，是土地「還是不是作農業使用的農業用地」。仍是農地時，贈與繼承人或繼承可全數扣除、移轉給自然人可不課土增稅；被區段徵收時土增稅免徵；領回抵價地第一次移轉減徵 40%；變更為建地後則全部回到一般規定。四個階段的完整圖解、2026 年遺產稅與贈與稅級距，以及 5 年列管的追繳情形，整理在<a href="/guide/tax/">農地稅負一張圖</a>。</p>
 <h2>五、傳承順序：五個常見安排</h2>
 <h3>1. 先確認「農用狀態」，再談移轉</h3><p>取得農業用地作農業使用證明書是所有優惠的入場券。鐵皮、填土、阻斷灌排、堆放雜物都會讓申請不過。規劃第一步是現勘與整地，而不是簽贈與契約。</p>
 <h3>2. 增值題材的地，趁還是農地時先移轉</h3><p>開發前的農地，價值低、又能適用農用扣除，是贈與下一代的最佳時點。等到變更為建地才移轉，既失去農用優惠，又是以較高的公告現值計稅。</p>
@@ -820,20 +852,18 @@ article('/guide/family-office/', '家族辦公室與資產傳承：高資產客�
 <div class="card"><h3>律師・家族辦公室</h3><ul><li>依特留分新制檢視既有遺囑</li><li>設計農地分配與耕作／管理責任的家族協議</li><li>評估信託、遺囑執行人與失能安排</li><li>整合各專業的時間表與決策紀錄</li></ul></div>
 </div>
 
-<h2>八、相信土地能提供什麼</h2>
-<p>我們追蹤全台 45 個區段徵收、特定區與產業園區的進度與政府出處，並在南彰化提供農地買賣與現勘服務。若您的客戶需要評估某塊地是否在開發範圍內、外溢圈行情，或想找適合傳承配置的農地，歡迎透過 <a href="/submit/">委託表單</a> 與我們聯繫。</p>
-
 <h2>常見問題</h2>{''.join(f'<h3>{e(q)}</h3><p>{e(a)}</p>' for q, a in FO_FAQ)}
 <p class="note">本文為一般性資訊整理，依 2026 年 11 月可查得之法令與報導撰寫，不構成法律、稅務或投資建議。法令與免稅額可能變動，實際適用請洽地政士、會計師或律師依個案判斷。</p>""",
-        [{'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in FO_FAQ]}])
+        [{'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in FO_FAQ]}],
+        tldr=['農地在傳承配置裡同時扮演三個角色：<b>稅負緩衝</b>（農用可扣除遺產、贈與）、<b>長期增值</b>（區段徵收、特定區變更）、<b>實物保值</b>。三者的條件互相衝突，順序排錯就會失去優惠。', '關鍵分界線是「是否仍為農業用地並作農業使用」。變更為建地前，用農用優惠傳承；變更後，改用抵價地減徵、分年贈與與遺囑安排。', '持有主體以<b>自然人</b>為主：私法人原則上不得承受耕地，賣給公司也會同時失去土增稅與房地合一的免稅。', '每一次免稅傳承都帶著 <b>5 年列管</b>。家族要排的不是「給誰」，而是「什麼時候、在什麼狀態下給誰」。'])
 
 # ===== 在售農地 =====
 lrows = ''.join(f'<div class="pcard"><span class="small muted">{e(l.get("county"))}{e(l.get("town"))}・{e(l.get("zone"))}</span><h3>{e(l.get("title") or (str(l.get("area")) + " 坪農地"))}</h3><p class="small muted">開價 {e(l.get("price"))} 萬/坪・{e(l.get("own"))}</p><a class="btn" href="/submit/?listing={quote(str(l.get("id", "")))}&county={quote(str(l.get("county", "")))}">我想了解</a></div>' for l in LIST)
 cb, cld = crumbs([('首頁', '/'), ('在售農地', None)])
 write('/listings/', page('/listings/', f'在售農地：鄰近開發案的農地物件｜{BRAND}', '鄰近區段徵收、特定區與產業園區的在售農地，附與開發案的距離與潛力分析。',
-                         f'<section class="band"><div class="wrap">{cb}<h1>在售農地</h1><p class="lede muted">每筆物件都標示與最近開發案的距離與潛力分數。物件委由{e(CFG.get("broker_name"))}辦理，資訊以現況與謄本為準。</p>'
+                         f'<section class="band"><div class="wrap">' + hero(cb, '在售農地・委託物件', '在售農地', f'每筆物件都標示與最近開發案的距離與潛力分數。物件委由{CFG.get("broker_name")}辦理，資訊以現況與謄本為準。')
                          + (f'<div class="pgrid" style="margin-top:16px">{lrows}</div>' if LIST else '<div class="card" style="margin-top:16px"><h3>物件陸續上架中</h3><p class="muted">我們正在整理鄰近開發案的優質農地。想出售農地，或想找特定區域的土地，請填寫表單，我們會主動與您聯繫。</p><a class="btn acc" href="/submit/">填寫委託表單</a></div>')
-                         + '</div></section>', [cld], active='/listings/'), prio='0.7')
+                         + '</div></section>', [cld], active='/listings/', og=og('listings', '在售農地', '鄰近開發案的農地物件')), prio='0.7')
 
 # ===== 委託表單 =====
 opts = ''.join(f'<option value="{p["id"]}">{e(p["county"])}｜{e(p["name"])}</option>' for p in P)
@@ -875,7 +905,7 @@ if(!EP){{show('表單尚未啟用，請改用電話或 LINE 與我們聯繫。')
 B.disabled=true;B.textContent='送出中…';
 try{{await fetch(EP,{{method:'POST',mode:'no-cors',body:new URLSearchParams(new FormData(F))}});show('已收到您的資料，我們會盡快與您聯繫。',1);F.reset();sync()}}
 catch(e){{show('送出失敗，請稍後再試或直接來電。')}}B.disabled=false;B.textContent='送出'}})}}</script>"""
-write('/submit/', page('/submit/', f'委託刊登農地・我想找地｜{BRAND}', '委託刊登您的農地，或告訴我們想找的區域與預算，由專人協助評估開發潛力。', form, [cld], active='/submit/'), prio='0.6')
+write('/submit/', page('/submit/', f'委託刊登農地・我想找地｜{BRAND}', '委託刊登您的農地，或告訴我們想找的區域與預算，由相信土地專人協助查詢分區、開發範圍與周邊行情，評估開發潛力。', form, [cld], active='/submit/'), prio='0.6')
 
 # ===== 關於 =====
 cb, cld = crumbs([('首頁', '/'), ('關於與免責聲明', None)])
@@ -963,5 +993,38 @@ else:
       im.save(D('dist/assets/og.png'), optimize=True); shutil.copy(D('dist/assets/og.png'), D('src/og.png'))
   except Exception as ex:
       print('og.png 產生失敗：', ex)
+
+# ===== 每頁專屬分享圖（SEO／社群預覽） =====
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    import glob, textwrap
+    _f = '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc'
+    if not os.path.exists(_f):
+        _f = (glob.glob('/usr/share/fonts/**/NotoSansCJK*Bold*.tt*', recursive=True) + glob.glob('/usr/share/fonts/**/NotoSansCJK*.tt*', recursive=True) + glob.glob('/usr/share/fonts/**/*CJK*.tt*', recursive=True))[0]
+    FB, FS, FT = ImageFont.truetype(_f, 64), ImageFont.truetype(_f, 34), ImageFont.truetype(_f, 28)
+    os.makedirs(D('dist/assets/og'), exist_ok=True)
+    def _wrap(dr, s, font, width):
+        lines, cur = [], ''
+        for ch in s:
+            if dr.textlength(cur + ch, font=font) > width: lines.append(cur); cur = ch
+            else: cur += ch
+        return lines + [cur]
+    for slug, (title, sub, col) in OGQ.items():
+        im = Image.new('RGB', (1200, 630), '#1d4a33'); dr = ImageDraw.Draw(im)
+        dr.rectangle([0, 0, 1200, 14], fill=col)
+        for i in range(5): dr.line([(880 + i * 70, 120), (880 + i * 70, 470)], fill='#2b5c42', width=3)
+        for j in range(6): dr.line([(880, 120 + j * 70), (1160, 120 + j * 70)], fill='#2b5c42', width=3)
+        dr.ellipse([990, 250, 1060, 320], fill=col if col != '#1d4a33' else '#d4502a')
+        dr.rounded_rectangle([70, 70, 300, 120], 10, fill='#e8d36a'); dr.text((88, 74), '相信土地', font=FT, fill='#1d4a33')
+        y = 160
+        for ln in _wrap(dr, title, FB, 760)[:3]:
+            dr.text((70, y), ln, font=FB, fill='#f2f7f3'); y += 84
+        dr.text((70, y + 16), sub[:30], font=FS, fill='#e8d36a')
+        dr.rectangle([0, 560, 1200, 630], fill='#e8d36a')
+        dr.text((70, 576), f'{SITE.split("://")[1]}｜全台農地開發潛力平台', font=FT, fill='#1d4a33')
+        im.save(D(f'dist/assets/og/{slug}.png'), optimize=True)
+    print(f'分享圖：{len(OGQ)} 張')
+except Exception as ex:
+    print('分享圖產生失敗：', ex)
 
 print(f'完成：{len(PAGES)} 個頁面寫入 sitemap，輸出在 dist/')
