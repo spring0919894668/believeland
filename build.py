@@ -29,6 +29,10 @@ NEWS_AT = NEWS_ALL.get('updatedAt', '')
 LIST = json.load(open(D('data/listings.json'), encoding='utf-8'))
 GOV = json.load(open(D('data/gov_sources.json'), encoding='utf-8'))
 GOVK = {'plan': '計畫書圖', 'record': '審議／公聽會紀錄', 'page': '官方專頁', 'news': '政府新聞稿', 'report': '政府報告', 'agency': '主管機關'}
+COL = {}
+for _f in sorted(os.listdir(D('data/columns'))):
+    if _f.endswith('.json'): COL.update(json.load(open(D('data/columns/' + _f), encoding='utf-8')))
+COL_PUB = '2026-11-28'
 AMEN = json.load(open(D('data/amenities.json'), encoding='utf-8')) if os.path.exists(D('data/amenities.json')) else {}
 ACAT = [('交通', '#2f6db0'), ('學校', '#7a4bb3'), ('醫療', '#d4502a'), ('購物', '#c9a227'), ('公共服務', '#2f8a57'), ('公園綠地', '#5a9e3a')]
 SITE = CFG['site'].rstrip('/')
@@ -119,8 +123,12 @@ EXTRA_CSS = """
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .seg{display:flex;gap:8px;flex-wrap:wrap}.seg label{display:flex;align-items:center;gap:8px;font-weight:700;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
 .seg input{min-height:auto}
+.tldr{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--field);border-radius:12px;padding:14px 18px;margin:18px 0;max-width:46em}.tldr ul{margin:6px 0 0;padding-left:1.2em}.tldr li{margin:5px 0}
+.qa h3{font-size:17px;margin:18px 0 4px}.qa p{margin:0}
+.colmeta{font-size:14px;color:var(--mute)}.byline{font-size:14px;color:var(--mute);border-top:1px solid var(--line);margin-top:30px;padding-top:12px}
+.colcard .k{font-size:14px;color:var(--mute);margin:6px 0 0}
 """
-NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '委託刊登')]
+NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '委託刊登')]
 LOGO = '<svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" rx="8" fill="#e8d36a"/><g fill="none" stroke="#1d4a33" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#e8d36a"/></svg>'
 FAVICON = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="#1d4a33"/><g fill="none" stroke="#e8d36a" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#1d4a33"/></svg>'
 
@@ -454,6 +462,9 @@ home = f"""
 <p class="muted">依發展動能與價格基期評分，左上象限的開發案最值得長期觀察。<a href="/guide/risk/">看評估方法 →</a></p>
 <div class="cols" style="margin-top:14px"><div class="pgrid">{''.join(pcard(p) for p in top)}</div>
 {chart_scatter(P, '全台開發案價格基期與發展性矩陣', '圖：全台開發案的價格基期與發展性矩陣，左上角綠色區塊為低基期、高發展性的優先佈局區。')}</div>
+<h2 style="margin-top:36px">相信土地專欄：最新評估</h2>
+<p class="muted">整理政府公告與新聞，寫給投資者與從業人員的開發評估。<a href="/column/">看全部 {len(COL)} 篇 →</a></p>
+<div class="pgrid" style="margin-top:12px">{''.join(f'<a class="pcard colcard" href="/column/{q["id"]}/">{tag(q)}<h3>{e(COL[q["id"]]["t"])}</h3><p class="k">{e(q["county"])}{e(q["town"])}</p></a>' for q in sorted([q for q in P if q['id'] in COL], key=lambda q: (q['county'] != '彰化縣', -pot(q)['pri']))[:6])}</div>
 <h2 style="margin-top:36px">依縣市查詢</h2>
 <div class="chips" style="margin-top:12px">{''.join(f'<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="/county/{CSLUG[c]}/">{e(c)}（{sum(1 for p in P if p["county"] == c)}）</a>' for c in COUNTIES)}</div>
 </div></section>
@@ -552,6 +563,7 @@ for p in P:
 <p class="lede">{e(intro)}</p>
 <div class="kpis"><div><b>{STAGE[s]}</b><span>開發階段</span></div><div><b>{pt['dev']}</b><span>發展性分數</span></div><div><b>{pt['base']}</b><span>價格基期分數</span></div><div><b>{pt['pri']}</b><span>佈局優先分數</span></div></div>
 <h2>開發進度</h2><div class="track">{track}</div>{note}
+{f'<div class="tldr"><b>相信土地專欄</b>：<a href="/column/{p["id"]}/">{e(COL[p["id"]]["t"])}</a></div>' if p['id'] in COL else ''}
 <h2>重點事實</h2><ul class="facts">{''.join(f'<li>{e(f)}</li>' for f in p['facts'])}</ul>
 <h2>政府出處</h2>{gov_html}
 {f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
@@ -583,6 +595,81 @@ for p in P:
                     'geo': {'@type': 'GeoCoordinates', 'latitude': p['lat'], 'longitude': p['lng']}}}
     write(f'/project/{p["id"]}/', page(f'/project/{p["id"]}/', f'{p["name"]}進度與最新消息｜{p["county"]}{p["town"]}｜{BRAND}', desc[:150], body, [cld, ld],
                                       active='/projects/', og_type='article', head_extra=LEAF), lastmod=(NEWS.get(p['id'], {}).get('updatedAt') or NEWS_AT), prio='0.8')
+
+
+# ===== 相信土地專欄 =====
+def column_page(p, c):
+    pt = pot(p)
+    s_ = stage_of(p['step'])
+    path = f'/column/{p["id"]}/'
+    upd = NEWS.get(p['id'], {}).get('updatedAt') or NEWS_AT or TODAY
+    gl = GOV.get(p['id'], [])
+    n = news_of(p['id'])
+    track = ''.join(f'<div class="{"done" if i < p["step"] else "now" if i == p["step"] else ""}">{t}</div>' for i, t in enumerate(STEPS))
+    tbl = (f'<div class="scroll"><table><tbody>'
+           f'<tr><th scope="row">計畫名稱</th><td><a href="/project/{p["id"]}/">{e(p["name"])}</a></td></tr>'
+           f'<tr><th scope="row">位置</th><td>{e(p["county"])}{e(p["town"])}</td></tr>'
+           f'<tr><th scope="row">開發方式</th><td>{e(p["type"])}</td></tr>'
+           f'<tr><th scope="row">規模</th><td>{e(p["area"] if p["area"] != "—" else "依計畫書公告")}</td></tr>'
+           f'<tr><th scope="row">目前進度</th><td>{e(STEPS[p["step"]])}（{STAGE[s_]}）</td></tr>'
+           f'<tr><th scope="row">相信土地評分</th><td>發展性 {pt["dev"]}・價格基期 {pt["base"]}・佈局優先 {pt["pri"]}（滿分 100，<a href="/guide/risk/">評分方法</a>）</td></tr>'
+           f'</tbody></table></div>')
+    secs = ''.join(f'<h2>{e(h)}</h2><p>{e(t)}</p>' for h, t in c['s'])
+    pro = ''.join(f'<li>{e(x)}</li>' for x in c['pro'])
+    faq = ''.join(f'<div class="qa"><h3>{e(q)}</h3><p>{e(a)}</p></div>' for q, a in c['faq'])
+    gov = ''.join(f'<li><a href="{e(safe_url(g["u"]))}" target="_blank" rel="noopener">{e(g["t"])}</a> <span class="small muted">— {e(g["o"])}</span></li>' for g in gl)
+    nws = ''.join(f'<li>{e(it.get("date", ""))}・{e(it.get("source", ""))}：<a href="{e(safe_url(it.get("url", "")))}" target="_blank" rel="nofollow noopener noreferrer">{e(it.get("title", ""))}</a></li>' for it in n[:6])
+    same = [q for q in P if q['county'] == p['county'] and q['id'] != p['id'] and q['id'] in COL]
+    rel = ''.join(f'<li><a href="/column/{q["id"]}/">{e(COL[q["id"]]["t"])}</a></li>' for q in same[:5])
+    cb, cld = crumbs([('首頁', '/'), ('相信土地專欄', '/column/'), (p['county'], f'/county/{CSLUG[p["county"]]}/'), (p['name'], None)])
+    body = f"""<section class="band"><div class="wrap article">{cb}
+{tag(p)} <span class="colmeta">相信土地專欄・{e(p['county'])}{e(p['town'])}・資料更新 {e(upd)}</span>
+<h1 style="margin-top:10px">{e(c['t'])}</h1>
+<p class="lede muted">{e(c['d'])}</p>
+<div class="tldr"><b>重點摘要</b><ul>{''.join(f'<li>{e(x)}</li>' for x in c['k'])}</ul></div>
+{tbl}
+<h2>開發進度</h2><div class="track">{track}</div>
+{secs}
+<h2>給從業人員的評估清單</h2><ol>{pro}</ol>
+{f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
+<h2>常見問題</h2>{faq}
+<h2>資料來源</h2>
+<h3 style="font-size:17px">政府出處</h3><ul class="small">{gov or '<li>整理中</li>'}</ul>
+{f'<h3 style="font-size:17px">新聞報導</h3><ul class="small">{nws}</ul>' if nws else ''}
+<div class="chips" style="margin-top:18px"><a class="btn acc" href="/project/{p['id']}/">看{e(p['name'])}進度、地圖與分區</a><a class="btn" href="/submit/?project={p['id']}&county={quote(p['county'])}">委託刊登 / 我想找地</a></div>
+{f'<h2>{e(p["county"])}其他專欄</h2><ul>{rel}</ul>' if rel else ''}
+<p class="byline">本文由{e(BRAND)}依政府公開資料與新聞報導整理撰寫，內容以撰寫時點為準，非投資建議；範圍、分區與時程請以主管機關公告為準。{broker_line()}</p>
+</div></section>"""
+    cites = [g['u'] for g in gl] + [it.get('url') for it in n[:6] if it.get('url')]
+    ld = {'@context': 'https://schema.org', '@type': 'Article', 'headline': c['t'], 'description': c['d'], 'inLanguage': 'zh-TW',
+          'datePublished': COL_PUB, 'dateModified': max(upd, COL_PUB), 'author': {'@type': 'Organization', 'name': BRAND, 'url': SITE + '/'},
+          'publisher': {'@type': 'Organization', 'name': BRAND, 'logo': {'@type': 'ImageObject', 'url': SITE + '/og.png'}},
+          'mainEntityOfPage': SITE + path, 'image': SITE + '/og.png', 'articleSection': '相信土地專欄',
+          'keywords': ', '.join([p['name'], p['county'] + p['town'], p['type'], '區段徵收', '農地投資', '開發評估']),
+          'about': {'@type': 'Place', 'name': p['name'], 'geo': {'@type': 'GeoCoordinates', 'latitude': p['lat'], 'longitude': p['lng']},
+                    'address': {'@type': 'PostalAddress', 'addressRegion': p['county'], 'addressLocality': p['town'], 'addressCountry': 'TW'}},
+          'citation': cites, 'abstract': ' '.join(c['k'])}
+    fq = {'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in c['faq']]}
+    write(path, page(path, f'{c["t"]}｜{BRAND}專欄', c['d'][:150], body, [cld, ld, fq], active='/column/', og_type='article'), lastmod=max(upd, COL_PUB), prio='0.8')
+
+
+for p in P:
+    if p['id'] in COL: column_page(p, COL[p['id']])
+
+blocks = ''
+for r, cs in REG.items():
+    ps = [p for p in P if p['county'] in cs and p['id'] in COL]
+    if not ps: continue
+    blocks += f'<h2>{r}</h2><div class="pgrid" style="margin-top:12px">' + ''.join(
+        f'<a class="pcard colcard" href="/column/{p["id"]}/">{tag(p)}<h3>{e(COL[p["id"]]["t"])}</h3><p class="k">{e(p["county"])}{e(p["town"])}・{e(STEPS[p["step"]])}</p></a>' for p in ps) + '</div>'
+cb, cld = crumbs([('首頁', '/'), ('相信土地專欄', None)])
+cdesc = f'相信土地專欄：依各縣市政府公告與新聞，逐案評估全台 {len(COL)} 個區段徵收、特定區與產業園區的進度、價格與風險，給農地投資者與不動產從業人員參考。'
+write('/column/', page('/column/', f'相信土地專欄：全台區段徵收與農地開發評估｜{BRAND}', cdesc,
+      f'<section class="band"><div class="wrap">{cb}<h1>相信土地專欄</h1><p class="lede muted">{e(cdesc)}</p>'
+      f'<div class="tldr"><b>怎麼讀這些文章</b><ul><li>每篇都先列「重點摘要」，再分「官方怎麼說」「新聞透露什麼」「相信土地怎麼看」。</li><li>文末附政府出處與新聞連結，可以自行查證。</li><li>「給從業人員的評估清單」整理帶看與簽約前要確認的事項。</li></ul></div>{blocks}</div></section>',
+      [cld, {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': '相信土地專欄', 'description': cdesc, 'url': SITE + '/column/',
+             'hasPart': [{'@type': 'Article', 'headline': COL[p['id']]['t'], 'url': f'{SITE}/column/{p["id"]}/'} for p in P if p['id'] in COL]}],
+      active='/column/'), prio='0.9')
 
 # ===== 投資指南 =====
 GUIDES = [('/guide/expropriation/', '區段徵收、市地重劃、農地重劃差在哪？', '一次看懂三種土地開發方式的法源、領回比例、增值空間與風險，以及區段徵收的七個步驟。'),
