@@ -134,10 +134,10 @@ EXTRA_CSS += IG.CSS + '''
 .related{margin-top:36px;padding-top:20px;border-top:1px solid var(--line)}.related h2{font-size:22px}
 .ctab{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--field);color:var(--fieldInk);border-radius:16px;padding:18px 22px;margin-top:28px}.ctab h3{margin:0}.ctab p{margin:4px 0 0;opacity:.85}
 .gcard{display:grid;grid-template-columns:48px 1fr;gap:4px 14px;align-items:start}.gcard .gi{grid-row:span 2;width:48px;height:48px;border-radius:14px;background:var(--field);display:grid;place-items:center}.gcard h3{margin:0}
-.cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
+.cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.ucard{display:flex;flex-direction:column;gap:8px}.ucard h3{margin:2px 0 0}.ucard>.tag{align-self:flex-start}.ucard .who{border-top:1px dashed var(--line);padding-top:8px;font-size:15px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs a{flex:1 1 220px;text-decoration:none;border:2px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--card)}.tabs a.on{border-color:var(--field);box-shadow:0 0 0 2px var(--field) inset}.tabs b{display:block;font-size:17px}.fsec{grid-column:1/-1;font-size:16px;font-weight:900;margin:8px 0 -4px;padding-top:10px;border-top:1px solid var(--line)}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
 '''
 GSC = (f'<meta name="google-site-verification" content="{e(CFG["gsc_verify"])}">\n' if CFG.get('gsc_verify') else '') + (f'<meta name="msvalidate.01" content="{e(CFG["bing_verify"])}">\n' if CFG.get('bing_verify') else '')
-NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '委託刊登')]
+NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '我要刊登')]
 LOGO = '<svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" rx="8" fill="#e8d36a"/><g fill="none" stroke="#1d4a33" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#e8d36a"/></svg>'
 FAVICON = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="#1d4a33"/><g fill="none" stroke="#e8d36a" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#1d4a33"/></svg>'
 
@@ -859,21 +859,68 @@ article('/guide/family-office/', '家族辦公室與資產傳承：高資產客�
         tldr=['農地在傳承配置裡同時扮演三個角色：<b>稅負緩衝</b>（農用可扣除遺產、贈與）、<b>長期增值</b>（區段徵收、特定區變更）、<b>實物保值</b>。三者的條件互相衝突，順序排錯就會失去優惠。', '關鍵分界線是「是否仍為農業用地並作農業使用」。變更為建地前，用農用優惠傳承；變更後，改用抵價地減徵、分年贈與與遺囑安排。', '持有主體以<b>自然人</b>為主：私法人原則上不得承受耕地，賣給公司也會同時失去土增稅與房地合一的免稅。', '每一次免稅傳承都帶著 <b>5 年列管</b>。家族要排的不是「給誰」，而是「什麼時候、在什麼狀態下給誰」。'])
 
 # ===== 在售農地 =====
-lrows = ''.join(f'<div class="pcard"><span class="small muted">{e(l.get("county"))}{e(l.get("town"))}・{e(l.get("zone"))}</span><h3>{e(l.get("title") or (str(l.get("area")) + " 坪農地"))}</h3><p class="small muted">開價 {e(l.get("price"))} 萬/坪・{e(l.get("own"))}</p><a class="btn" href="/submit/?listing={quote(str(l.get("id", "")))}&county={quote(str(l.get("county", "")))}">我想了解</a></div>' for l in LIST)
+ULIST = []
+if CFG.get('form_endpoint'):
+    try:
+        import urllib.request
+        with urllib.request.urlopen(CFG['form_endpoint'] + '?action=listings', timeout=20) as r:
+            ULIST = (json.loads(r.read().decode('utf-8')) or {}).get('items', [])[:200]
+    except Exception as ex:
+        print('自行刊登資料讀取失敗（改由瀏覽器載入）：', ex)
+LDISC = '本區物件由刊登人自行提供並自負責任，相信土地僅提供刊登版位，未查證物件、價格、產權與刊登人資格，不負資訊正確性之責；交易前請自行查證謄本、地籍圖、使用分區與刊登人證照，並透過合法經紀業或地政士辦理。'
+ROLE_C = {'不動產經紀人': 'var(--field)', '不動產營業員': 'var(--pre)', '地政士': '#7a4bb3', '地主自售': 'var(--post)', '其他': 'var(--mute)'}
+
+
+def ucard(l):
+    g = lambda k: e(l.get(k, '') or '')
+    price = (f'總價 {g("total")} 萬' if l.get('total') else '') + (f'・{g("price")} 萬/坪' if l.get('price') else '')
+    lid = re.sub(r'[^A-Za-z0-9._@-]', '', str(l.get('line', '')))
+    line = f'<a class="btn" style="background:#06c755;color:#fff;border:0" href="https://line.me/R/ti/p/~{quote(lid)}" target="_blank" rel="nofollow noopener">LINE 加好友</a>' if lid else ''
+    ph = re.sub(r'\D', '', str(l.get('phone', '')))
+    cred = '・'.join(x for x in [g('company'), (f'證號 {g("license")}' if l.get('license') else '')] if x)
+    return (f'<article class="pcard ucard" id="{g("id")}"><span class="tag" style="background:{ROLE_C.get(l.get("role"), "var(--mute)")}">{g("role")}</span> '
+            f'<span class="small muted">{g("county")}{g("town")}{("・" + g("zone")) if l.get("zone") else ""}</span>'
+            f'<h3>{g("title")}</h3><p class="small" style="margin:0">{g("kind")}{("・" + g("area") + " 坪") if l.get("area") else ""}{("・" + price) if price else ""}{("・" + g("own")) if l.get("own") else ""}</p>'
+            + (f'<p class="small muted" style="margin:6px 0 0">{g("desc")}</p>' if l.get('desc') else '')
+            + f'<div class="who"><b>刊登人：{g("name")}</b>{("<br><span class=small>" + cred + "</span>") if cred else ""}</div>'
+            f'<div class="chips"><a class="btn acc" href="tel:{ph}">撥打 {g("phone")}</a>{line}</div>'
+            f'<p class="note" style="margin:8px 0 0">刊登日 {g("ts")}・編號 {g("id")}・資訊由刊登人提供，本站未查證。</p></article>')
+
+
+lrows = ''.join(f'<div class="pcard"><span class="tag" style="background:var(--acc)">相信土地委託</span> <span class="small muted">{e(l.get("county"))}{e(l.get("town"))}・{e(l.get("zone"))}</span><h3>{e(l.get("title") or (str(l.get("area")) + " 坪農地"))}</h3><p class="small muted">開價 {e(l.get("price"))} 萬/坪・{e(l.get("own"))}</p><a class="btn" href="/submit/?listing={quote(str(l.get("id", "")))}&county={quote(str(l.get("county", "")))}">我想了解</a></div>' for l in LIST)
 cb, cld = crumbs([('首頁', '/'), ('在售農地', None)])
-write('/listings/', page('/listings/', f'在售農地：鄰近開發案的農地物件｜{BRAND}', '鄰近區段徵收、特定區與產業園區的在售農地，附與開發案的距離與潛力分析。',
-                         f'<section class="band"><div class="wrap">' + hero(cb, '在售農地・委託物件', '在售農地', f'每筆物件都標示與最近開發案的距離與潛力分數。物件委由{CFG.get("broker_name")}辦理，資訊以現況與謄本為準。')
-                         + (f'<div class="pgrid" style="margin-top:16px">{lrows}</div>' if LIST else '<div class="card" style="margin-top:16px"><h3>物件陸續上架中</h3><p class="muted">我們正在整理鄰近開發案的優質農地。想出售農地，或想找特定區域的土地，請填寫表單，我們會主動與您聯繫。</p><a class="btn acc" href="/submit/">填寫委託表單</a></div>')
-                         + '</div></section>', [cld], active='/listings/', og=og('listings', '在售農地', '鄰近開發案的農地物件')), prio='0.7')
+fcty = ''.join(f'<button class="chip" data-v="{e(c)}">{e(c)}</button>' for c in sorted({l.get('county') for l in ULIST if l.get('county')}))
+ld_items = {'@context': 'https://schema.org', '@type': 'ItemList', 'name': '在售農地與土地物件', 'numberOfItems': len(ULIST) + len(LIST),
+            'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'url': f'{SITE}/listings/#{l.get("id")}', 'name': l.get('title', '')} for i, l in enumerate(ULIST[:50])]}
+lbody = (f'<section class="band"><div class="wrap">' + hero(cb, '在售農地・從業人員刊登', '在售農地與土地物件', '相信土地委託物件，以及不動產經紀人、營業員、地政士與地主自行刊登的物件。直接撥打手機或加 LINE 與刊登人聯絡。',
+                                                          [(len(LIST), '相信土地委託'), (len(ULIST), '自行刊登'), ('免費', '從業人員刊登')])
+         + cta('你是不動產從業人員？', '免費自行刊登農地、建地、廠房，買方直接打給你。', '/submit/#self', '我要刊登')
+         + (f'<h2 style="margin-top:32px">相信土地委託物件</h2><div class="pgrid">{lrows}</div>' if LIST else '')
+         + f'<h2 style="margin-top:32px">從業人員自行刊登</h2><div class="risk"><b>免責聲明：</b>{e(LDISC)}</div>'
+         + f'<div class="chips" id="uF" style="margin:14px 0"><button class="chip on" data-v="">全部縣市</button>{fcty}</div>'
+         + f'<div class="pgrid" id="uL">{"".join(ucard(l) for l in ULIST) or "<p class=muted id=uE>目前還沒有自行刊登的物件，歡迎成為第一位刊登者。</p>"}</div>'
+         + '<p class="note" style="margin-top:14px">發現不實或已成交的物件？請透過<a href="/submit/?type=物件詢問">表單</a>回報物件編號，我們會下架處理。</p>'
+         + '</div></section>'
+         + "<script>(()=>{const EP=" + json.dumps(CFG.get('form_endpoint', '')) + r""";const L=document.getElementById('uL'),FB=document.getElementById('uF');let all=[];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RC=""" + json.dumps(ROLE_C, ensure_ascii=False) + r""";
+const card=l=>{const lid=String(l.line||'').replace(/[^A-Za-z0-9._@-]/g,''),ph=String(l.phone||'').replace(/\D/g,'');const pr=[l.total?`總價 ${esc(l.total)} 萬`:'',l.price?`${esc(l.price)} 萬/坪`:''].filter(Boolean).join('・');const cred=[esc(l.company),l.license?'證號 '+esc(l.license):''].filter(Boolean).join('・');
+return `<article class="pcard ucard" id="${esc(l.id)}"><span class="tag" style="background:${RC[l.role]||'var(--mute)'}">${esc(l.role)}</span> <span class="small muted">${esc(l.county)}${esc(l.town)}${l.zone?'・'+esc(l.zone):''}</span><h3>${esc(l.title)}</h3><p class="small" style="margin:0">${esc(l.kind)}${l.area?'・'+esc(l.area)+' 坪':''}${pr?'・'+pr:''}${l.own?'・'+esc(l.own):''}</p>${l.desc?`<p class="small muted" style="margin:6px 0 0">${esc(l.desc)}</p>`:''}<div class="who"><b>刊登人：${esc(l.name)}</b>${cred?'<br><span class=small>'+cred+'</span>':''}</div><div class="chips"><a class="btn acc" href="tel:${ph}">撥打 ${esc(l.phone)}</a>${lid?`<a class="btn" style="background:#06c755;color:#fff;border:0" href="https://line.me/R/ti/p/~${encodeURIComponent(lid)}" target="_blank" rel="nofollow noopener">LINE 加好友</a>`:''}</div><p class="note" style="margin:8px 0 0">刊登日 ${esc(l.ts)}・編號 ${esc(l.id)}・資訊由刊登人提供，本站未查證。</p></article>`};
+let cur='';const draw=()=>{const xs=all.filter(l=>!cur||l.county===cur);L.innerHTML=xs.map(card).join('')||'<p class=muted>目前還沒有自行刊登的物件，歡迎成為第一位刊登者。</p>'};
+FB.addEventListener('click',ev=>{const b=ev.target.closest('[data-v]');if(!b)return;cur=b.dataset.v;FB.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));if(all.length)draw();else L.querySelectorAll('.ucard').forEach(c=>c.hidden=!!cur&&!c.querySelector('.small.muted').textContent.startsWith(cur))});
+if(EP)fetch(EP+'?action=listings').then(r=>r.json()).then(d=>{if(!d||!d.items)return;all=d.items;const cs=[...new Set(all.map(l=>l.county).filter(Boolean))];FB.innerHTML='<button class="chip on" data-v="">全部縣市</button>'+cs.map(c=>`<button class="chip" data-v="${esc(c)}">${esc(c)}</button>`).join('');cur='';draw();if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView()}}).catch(()=>{})})()</script>""")
+write('/listings/', page('/listings/', f'在售農地、建地與廠房物件｜從業人員免費刊登｜{BRAND}', '相信土地委託物件與不動產經紀人、營業員、地政士自行刊登的農地、建地、廠房物件，附刊登人身分、手機與 LINE，直接聯絡刊登人。',
+                         lbody, [cld, ld_items], active='/listings/', og=og('listings', '在售農地與土地物件', '從業人員免費刊登・直接聯絡刊登人')), prio='0.8')
 
 # ===== 委託表單 =====
+LIST_DAYS_TXT = '90 天'
 opts = ''.join(f'<option value="{p["id"]}">{e(p["county"])}｜{e(p["name"])}</option>' for p in P)
 cty = ''.join(f'<option{" selected" if c == "彰化縣" else ""}>{c}</option>' for c in ['臺北市', '新北市', '基隆市', '桃園市', '新竹縣', '新竹市', '苗栗縣', '臺中市', '彰化縣', '南投縣', '雲林縣', '嘉義縣', '嘉義市', '臺南市', '高雄市', '屏東縣', '宜蘭縣', '花蓮縣', '臺東縣', '澎湖縣', '金門縣', '連江縣'])
 endpoint = CFG.get('form_endpoint', '')
-cb, cld = crumbs([('首頁', '/'), ('委託刊登', None)])
-form = f"""<section class="band"><div class="wrap" style="max-width:860px">{cb}
-<h1>委託刊登・我想找地</h1>
-<p class="lede muted">填寫後由{e(CFG.get('broker_name'))}專人與您聯繫。刊登物件會先經過謄本與現況確認，再上架到在售農地。</p>
+cb, cld = crumbs([('首頁', '/'), ('我要刊登', None)])
+form = f"""<section class="band"><div class="wrap" style="max-width:920px">{hero(cb, '我要刊登・委託・找地', '我要刊登', '地主與買方可以委託相信土地處理；不動產經紀人、營業員、地政士與地主也可以免費自行刊登，物件直接公開在「在售農地」，買方打你的手機或加你的 LINE。')}
+<nav class="tabs" aria-label="刊登方式"><a href="#ask" data-t="ask" class="on"><b>委託相信土地</b><span class="small muted">賣地、找地、詢問物件，由專人與您聯繫</span></a><a href="#self" data-t="self"><b>從業人員自行刊登</b><span class="small muted">免費上架 {LIST_DAYS_TXT}，公開您的身分、手機與 LINE</span></a></nav>
+<div id="ask" class="pane">
 <form class="card form" id="F" novalidate>
 <div class="full seg" role="radiogroup" aria-label="需求類型"><label><input type="radio" name="type" value="委託刊登" checked> 我要賣地／委託刊登</label><label><input type="radio" name="type" value="我想找地"> 我想買地／找地</label><label><input type="radio" name="type" value="物件詢問"> 詢問物件</label></div>
 <label>您的稱呼<input name="name" required maxlength="30" autocomplete="name"></label>
@@ -894,7 +941,38 @@ form = f"""<section class="band"><div class="wrap" style="max-width:860px">{cb}
 <label class="full" style="font-weight:400;display:flex;gap:10px;align-items:flex-start"><input type="checkbox" name="agree" required style="min-height:auto;margin-top:5px"> 我同意{e(CFG.get('broker_name'))}使用以上資料與我聯繫，資料僅用於本次委託與諮詢。</label>
 <div class="full chips"><button class="btn acc" type="submit" id="Fbtn">送出</button></div>
 <div class="full formmsg" id="Fmsg" hidden></div>
-</form></div></section>
+</form></div>
+<div id="self" class="pane" hidden>
+<div class="risk" style="margin-bottom:14px"><b>刊登前請閱讀：</b>自行刊登的物件<b>立即公開</b>於<a href="/listings/">在售農地</a>，並顯示您填寫的<b>刊登人身分、姓名、所屬經紀業或事務所、證照字號、手機與 LINE</b>。資訊由刊登人自行提供並自負法律責任，{e(BRAND)}僅提供刊登版位，不查證、不擔保資訊正確性，也不參與交易。經紀人員刊登請依不動產經紀業管理條例註明所屬經紀業名稱。物件 {LIST_DAYS_TXT}後自動下架；不實、重複或已成交物件，本站得逕行下架。</div>
+<form class="card form" id="P" novalidate>
+<p class="fsec">一、刊登人身分（將公開）</p>
+<label>刊登人身分<select name="role" required><option value="">請選擇</option><option>不動產經紀人</option><option>不動產營業員</option><option>地政士</option><option>地主自售</option><option>其他</option></select></label>
+<label>姓名<input name="name" required maxlength="20" autocomplete="name"></label>
+<label class="cred">所屬經紀業／事務所<input name="company" maxlength="40" placeholder="例：○○不動產經紀有限公司"></label>
+<label class="cred">證照字號<input name="license" maxlength="40" placeholder="經紀人證書或營業員登錄字號"></label>
+<label>手機（將公開）<input name="phone" required maxlength="12" inputmode="tel" placeholder="0912345678" autocomplete="tel"></label>
+<label>LINE ID（將公開，選填）<input name="line" maxlength="40" placeholder="加好友用的 ID"></label>
+<label class="full">Email（不公開，選填，用於下架通知）<input name="email" type="email" maxlength="80" autocomplete="email"></label>
+<p class="fsec">二、物件資料</p>
+<label class="full">物件標題<input name="title" required maxlength="40" placeholder="例：田中高鐵特定區旁 方正農地 臨 8 米路"></label>
+<label>物件類型<select name="kind"><option>農地</option><option>建地</option><option>工業地／廠房</option><option>農舍</option><option>其他土地</option></select></label>
+<label>使用分區<select name="zone"><option value="">不確定</option><option>都市計畫農業區</option><option>一般農業區</option><option>特定農業區</option><option>山坡地保育區</option><option>鄉村區</option><option>住宅區</option><option>工業區</option><option>其他</option></select></label>
+<label>縣市<select name="county">{cty}</select></label>
+<label>鄉鎮市區<input name="town" maxlength="20" placeholder="例：田中鎮"></label>
+<label>地段（不需地號）<input name="section" maxlength="30" placeholder="例：○○段"></label>
+<label>產權<select name="own"><option>單獨所有</option><option>持分</option><option>不確定</option></select></label>
+<label>面積（坪）<input name="area" type="number" min="0" step="0.01"></label>
+<label>總價（萬元）<input name="total" type="number" min="0" step="1"></label>
+<label>單價（萬元/坪）<input name="price" type="number" min="0" step="0.01"></label>
+<label>臨路<input name="road" maxlength="20" placeholder="例：臨 8 米路"></label>
+<label class="full">鄰近的開發案（選填）<select name="project"><option value="">— 不指定 —</option>{opts}</select></label>
+<label class="full">物件說明（將公開）<textarea name="desc" maxlength="300" placeholder="現況、水電、可否建農舍、優缺點…請勿填寫地號與屋主個資"></textarea></label>
+<input type="hidden" name="type" value="從業人員刊登">
+<div class="hp" aria-hidden="true"><label>請勿填寫<input name="website" tabindex="-1" autocomplete="off"></label></div>
+<label class="full" style="font-weight:400;display:flex;gap:10px;align-items:flex-start"><input type="checkbox" name="agree" required style="min-height:auto;margin-top:5px"> 我確認已取得所有權人委託或同意刊登，資訊真實；同意公開以上標示「將公開」的資料；並了解{e(BRAND)}不負資訊正確性責任，刊登內容由我自負法律責任。</label>
+<div class="full chips"><button class="btn acc" type="submit" id="Pbtn">免費刊登上架</button><a class="btn" href="/listings/">先看已刊登物件</a></div>
+<div class="full formmsg" id="Pmsg" hidden></div>
+</form></div></div></section>
 <script>{{const EP={json.dumps(endpoint)};const F=document.getElementById('F'),M=document.getElementById('Fmsg'),B=document.getElementById('Fbtn');
 const PC={json.dumps({p['id']: p['county'] for p in P}, ensure_ascii=False)};const q=new URLSearchParams(location.search);if(q.get('project')){{F.project.value=q.get('project');if(PC[q.get('project')])F.county.value=PC[q.get('project')]}}if(q.get('county')&&[...F.county.options].some(o=>o.value===q.get('county')))F.county.value=q.get('county');if(q.get('listing')){{F.listing.value=q.get('listing');F.querySelector('input[value="物件詢問"]').checked=true}}
 F.page.value=document.referrer||'';
@@ -905,8 +983,25 @@ if(!F.name.value.trim()||!F.phone.value.trim()){{show('請填寫稱呼與聯絡�
 if(!EP){{show('表單尚未啟用，請改用電話或 LINE 與我們聯繫。');return}}
 B.disabled=true;B.textContent='送出中…';
 try{{await fetch(EP,{{method:'POST',mode:'no-cors',body:new URLSearchParams(new FormData(F))}});show('已收到您的資料，我們會盡快與您聯繫。',1);F.reset();sync()}}
-catch(e){{show('送出失敗，請稍後再試或直接來電。')}}B.disabled=false;B.textContent='送出'}})}}</script>"""
-write('/submit/', page('/submit/', f'委託刊登農地・我想找地｜{BRAND}', '委託刊登您的農地，或告訴我們想找的區域與預算，由相信土地專人協助查詢分區、開發範圍與周邊行情，評估開發潛力。', form, [cld], active='/submit/'), prio='0.6')
+catch(e){{show('送出失敗，請稍後再試或直接來電。')}}B.disabled=false;B.textContent='送出'}});
+const tabs=document.querySelectorAll('.tabs a');const go=t=>{{document.querySelectorAll('.pane').forEach(p=>p.hidden=p.id!==t);tabs.forEach(a=>a.classList.toggle('on',a.dataset.t===t))}};
+tabs.forEach(a=>a.addEventListener('click',ev=>{{ev.preventDefault();go(a.dataset.t);history.replaceState(null,'','#'+a.dataset.t)}}));if(location.hash==='#self')go('self');
+if(q.get('type')){{const r=[...F.type].find(x=>x.value===q.get('type'));if(r){{r.checked=true;sync()}}}}
+const P=document.getElementById('P'),PM=document.getElementById('Pmsg'),PB=document.getElementById('Pbtn');
+const ps=(t,ok)=>{{PM.hidden=false;PM.innerHTML=t;PM.style.background=ok?'':'light-dark(#fff1ec,#2a1710)'}};
+const cr=()=>{{const b=['不動產經紀人','不動產營業員'].includes(P.role.value);P.company.required=b;P.querySelectorAll('.cred input').forEach(i=>i.placeholder=b?(i.name==='company'?'必填：所屬經紀業名稱':'經紀人證書或營業員登錄字號'):'選填')}};P.role.addEventListener('change',cr);cr();
+P.addEventListener('submit',async ev=>{{ev.preventDefault();if(P.website.value)return;
+const ph=P.phone.value.replace(/[\s-]/g,'');
+if(!P.role.value||!P.name.value.trim()||!P.title.value.trim()){{ps('請填寫刊登人身分、姓名與物件標題。');return}}
+if(!/^09\d{{8}}$/.test(ph)){{ps('手機請填 09 開頭的 10 碼號碼。');return}}
+if(P.company.required&&!P.company.value.trim()){{ps('經紀人員刊登請填寫所屬經紀業名稱。');return}}
+if(P.line.value&&!/^[A-Za-z0-9._@-]{{1,40}}$/.test(P.line.value.trim())){{ps('LINE ID 只能包含英數字與 . _ - @。');return}}
+if(!P.agree.checked){{ps('請勾選刊登聲明。');return}}
+if(!EP){{ps('刊登功能尚未啟用。');return}}
+PB.disabled=true;PB.textContent='上架中…';P.phone.value=ph;P.line.value=P.line.value.trim();
+try{{await fetch(EP,{{method:'POST',mode:'no-cors',body:new URLSearchParams(new FormData(P))}});ps('已上架！約 5 分鐘內會出現在 <a href="/listings/">在售農地</a>。',1);P.reset();cr()}}
+catch(e){{ps('送出失敗，請稍後再試。')}}PB.disabled=false;PB.textContent='免費刊登上架'}})}}</script>"""
+write('/submit/', page('/submit/', f'我要刊登：從業人員免費刊登農地・委託賣地找地｜{BRAND}', '不動產經紀人、營業員、地政士與地主可免費自行刊登農地、建地、廠房，公開身分、手機與 LINE 讓買方直接聯絡；也可委託相信土地賣地、找地。', form, [cld], active='/submit/', og=og('submit', '我要刊登', '從業人員免費刊登・買方直接聯絡你')), prio='0.6')
 
 # ===== 關於 =====
 cb, cld = crumbs([('首頁', '/'), ('關於與免責聲明', None)])
