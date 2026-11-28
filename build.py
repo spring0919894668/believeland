@@ -28,7 +28,8 @@ NEWS = NEWS_ALL.get('projects', {})
 NEWS_AT = NEWS_ALL.get('updatedAt', '')
 LIST = json.load(open(D('data/listings.json'), encoding='utf-8'))
 GOV = json.load(open(D('data/gov_sources.json'), encoding='utf-8'))
-GOVK = {'plan': '計畫書圖', 'record': '審議／公聽會紀錄', 'page': '官方專頁', 'news': '政府新聞稿', 'report': '政府報告', 'agency': '主管機關'}
+GOVK = {'plan': '計畫書圖', 'record': '審議／公聽會紀錄', 'page': '官方專頁', 'news': '政府新聞稿', 'report': '政府報告', 'agency': '主管機關', 'county': '縣市國土計畫', 'data': '開放資料'}
+RANGES = {k: v for k, v in json.load(open(D('data/ranges.json'), encoding='utf-8')).items() if not k.startswith('_')} if os.path.exists(D('data/ranges.json')) else {}
 COL = {}
 for _f in sorted(os.listdir(D('data/columns'))):
     if _f.endswith('.json'): COL.update(json.load(open(D('data/columns/' + _f), encoding='utf-8')))
@@ -134,7 +135,7 @@ EXTRA_CSS += IG.CSS + '''
 .related{margin-top:36px;padding-top:20px;border-top:1px solid var(--line)}.related h2{font-size:22px}
 .ctab{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--field);color:var(--fieldInk);border-radius:16px;padding:18px 22px;margin-top:28px}.ctab h3{margin:0}.ctab p{margin:4px 0 0;opacity:.85}
 .gcard{display:grid;grid-template-columns:48px 1fr;gap:4px 14px;align-items:start}.gcard .gi{grid-row:span 2;width:48px;height:48px;border-radius:14px;background:var(--field);display:grid;place-items:center}.gcard h3{margin:0}
-.cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.ucard{display:flex;flex-direction:column;gap:8px}.ucard h3{margin:2px 0 0}.ucard>.tag{align-self:flex-start}.ucard .who{border-top:1px dashed var(--line);padding-top:8px;font-size:15px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs a{flex:1 1 220px;text-decoration:none;border:2px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--card)}.tabs a.on{border-color:var(--field);box-shadow:0 0 0 2px var(--field) inset}.tabs b{display:block;font-size:17px}.fsec{grid-column:1/-1;font-size:16px;font-weight:900;margin:8px 0 -4px;padding-top:10px;border-top:1px solid var(--line)}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
+.cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.rangefig img{display:block;width:100%;max-width:820px;height:auto;border-radius:10px;border:1px solid var(--line)}.ucard{display:flex;flex-direction:column;gap:8px}.ucard h3{margin:2px 0 0}.ucard>.tag{align-self:flex-start}.ucard .who{border-top:1px dashed var(--line);padding-top:8px;font-size:15px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tabs a{flex:1 1 220px;text-decoration:none;border:2px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--card)}.tabs a.on{border-color:var(--field);box-shadow:0 0 0 2px var(--field) inset}.tabs b{display:block;font-size:17px}.fsec{grid-column:1/-1;font-size:16px;font-weight:900;margin:8px 0 -4px;padding-top:10px;border-top:1px solid var(--line)}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
 '''
 GSC = (f'<meta name="google-site-verification" content="{e(CFG["gsc_verify"])}">\n' if CFG.get('gsc_verify') else '') + (f'<meta name="msvalidate.01" content="{e(CFG["bing_verify"])}">\n' if CFG.get('bing_verify') else '')
 NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '我要刊登')]
@@ -213,6 +214,19 @@ def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow'
 </div><p class="wrap note" style="color:var(--fieldInk);opacity:.8;margin-top:18px">本網站提供資訊整理與試算，非投資建議；開發案資訊以政府公告為準。新聞資料更新於 {e(NEWS_AT)}。</p></footer>
 </body>
 </html>"""
+
+
+def range_fig(p, compact=False):
+    """官方計畫範圍圖（擷取自政府文件）；沒有時給出查核指引。"""
+    r = RANGES.get(p['id'])
+    if r:
+        return (f'<figure class="ig rangefig"><div class="ig-h"><span class="ig-b">官方計畫範圍圖</span><b>{e(p["name"])}</b></div>'
+                f'<a href="{e(safe_url(r["u"]))}" target="_blank" rel="noopener"><img src="/assets/ranges/{e(r["img"])}" alt="{e(p["name"])}官方計畫範圍圖：{e(r["note"])}" loading="lazy"></a>'
+                f'<figcaption><b>{e(r["note"])}</b></figcaption><p class="ig-src">圖片擷取自：{e(r["o"])}〈<a href="{e(safe_url(r["u"]))}" target="_blank" rel="noopener">{e(r["t"])}</a>〉第 {r["page"]} 頁。範圍以主管機關最新公告之計畫書圖為準。</p></figure>')
+    if compact: return ''
+    first = next((g for g in GOV.get(p['id'], []) if g['k'] in ('plan', 'record', 'county', 'page')), None)
+    link = f'，可先參考<a href="{e(safe_url(first["u"]))}" target="_blank" rel="noopener">{e(first["t"])}</a>' if first else ''
+    return f'<div class="note card" style="margin:12px 0"><b>官方計畫範圍圖整理中。</b>相信土地正逐案從計畫書圖擷取正式範圍{link}；或用下方「全國土地使用分區資料查詢系統」輸入地號查詢。</div>'
 
 
 def hero(cb, eyebrow, title, lede, kpis=None):
@@ -451,6 +465,7 @@ if os.path.exists(OUT): shutil.rmtree(OUT)
 os.makedirs(D('dist/assets'))
 open(D('dist/assets/site.css'), 'w', encoding='utf-8').write(BASE_CSS + EXTRA_CSS)
 shutil.copy(D('src/pmap.js'), D('dist/assets/pmap.js'))
+if os.path.isdir(D('src/ranges')): shutil.copytree(D('src/ranges'), D('dist/assets/ranges'))
 open(D('dist/assets/favicon.svg'), 'w', encoding='utf-8').write(FAVICON)
 os.makedirs(D('dist/data'))
 for f in ('news.json', 'listings.json', 'projects.json') + (('amenities.json',) if AMEN else ()):
@@ -605,6 +620,7 @@ for p in P:
     body = f"""<section class="band"><div class="wrap">
 {hero(cb, f'{tag(p)} {e(p["type"])}・{e(p["county"])}{e(p["town"])}', p['name'], intro, [(STAGE[s], '開發階段'), (f'{p["step"] + 1}/7', '目前步驟'), (e(p['type']), '開發方式'), (pt['pri'], '佈局優先分數')])}
 {IG.ig_steps(STEPS, p['step'], title=f"{p['name']}開發進度", name=p['name'])}{note}
+{range_fig(p)}
 <div class="cols"><div>
 {col_link}
 <h2>重點事實</h2><ul class="facts">{''.join(f'<li>{e(f)}</li>' for f in p['facts'])}</ul>
@@ -667,6 +683,7 @@ def column_page(p, c):
 {hero(cb, f'{tag(p)} 相信土地專欄・{e(p["county"])}{e(p["town"])}・資料更新 {e(upd)}', c['t'], c['d'])}
 <div class="tldr"><b>重點摘要</b><ul>{''.join(f'<li>{e(x)}</li>' for x in c['k'])}</ul></div>
 <div class="cols colhead"><div>{tbl}</div>{loc}</div>
+{range_fig(p, compact=True)}
 {secs}
 <h2>給從業人員的評估清單</h2><ol>{pro}</ol>
 {f'<div class="risk"><b>風險提示：</b>{e(p["risk"])}</div>' if p.get('risk') else ''}
