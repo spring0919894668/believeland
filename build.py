@@ -136,6 +136,7 @@ EXTRA_CSS += IG.CSS + '''
 .gcard{display:grid;grid-template-columns:48px 1fr;gap:4px 14px;align-items:start}.gcard .gi{grid-row:span 2;width:48px;height:48px;border-radius:14px;background:var(--field);display:grid;place-items:center}.gcard h3{margin:0}
 .cols>div>h2{margin-top:28px}.locator{max-width:340px;margin:0}.colhead{grid-template-columns:minmax(0,1fr) 340px}@media(max-width:860px){.colhead{grid-template-columns:minmax(0,1fr)}}
 '''
+GSC = (f'<meta name="google-site-verification" content="{e(CFG["gsc_verify"])}">\n' if CFG.get('gsc_verify') else '') + (f'<meta name="msvalidate.01" content="{e(CFG["bing_verify"])}">\n' if CFG.get('bing_verify') else '')
 NAV = [('/', '全台動態儀表板'), ('/projects/', '開發案總覽'), ('/column/', '相信土地專欄'), ('/listings/', '在售農地'), ('/guide/', '投資指南'), ('/submit/', '委託刊登')]
 LOGO = '<svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" rx="8" fill="#e8d36a"/><g fill="none" stroke="#1d4a33" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#e8d36a"/></svg>'
 FAVICON = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="8" fill="#1d4a33"/><g fill="none" stroke="#e8d36a" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 8.5V27" stroke-width="3.4"/><path d="M10.5 9H16.6a4.1 4.1 0 0 1 0 8.2H10.5" stroke-width="3"/><path d="M10.5 17.2H17.6a4.9 4.9 0 0 1 0 9.8" stroke-width="3"/><path d="M10.5 27H28.5" stroke-width="3.4"/></g><path d="M26 12.2a3.4 3.4 0 0 1 3.4 3.4c0 2.6-3.4 6.2-3.4 6.2s-3.4-3.6-3.4-6.2a3.4 3.4 0 0 1 3.4-3.4z" fill="#d4502a"/><circle cx="26" cy="15.6" r="1.2" fill="#1d4a33"/></svg>'
@@ -195,7 +196,7 @@ def page(path, title, desc, body, jsonld=None, active='/', robots='index,follow'
 <meta property="og:locale" content="zh_TW">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+{GSC}<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
 {head_extra}{ld}</head>
